@@ -1,7 +1,10 @@
 package com.example.jobhunter.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,7 +46,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
-
     // delete by id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> DeleteUser(@PathVariable("id") long id) throws IdInvalidException {
@@ -62,8 +64,17 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> fetchAllUser() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.fetchAllUser());
+    public ResponseEntity<List<User>> fetchAllUser(
+            @RequestParam("current") Optional<String> currentOptional,
+            @RequestParam("pageSize") Optional<String> pageSizeOptional) {
+        String sCurrent = currentOptional.isPresent() ? currentOptional.get() : "";
+        String sPageSize = pageSizeOptional.isPresent() ? pageSizeOptional.get() : "";
+        int current = Integer.parseInt(sCurrent);
+        int pageSize = Integer.parseInt(sPageSize);
+
+        Pageable pageable = PageRequest.of(current - 1, pageSize);
+
+        return ResponseEntity.status(HttpStatus.OK).body(userService.fetchAllUser(pageable));
     }
 
     @PutMapping("/update")

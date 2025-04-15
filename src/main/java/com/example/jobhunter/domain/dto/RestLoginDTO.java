@@ -1,10 +1,12 @@
-package com.example.jobhunter.domain;
+package com.example.jobhunter.domain.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter  
+@Setter
 public class RestLoginDTO {
     private String accessToken;
 

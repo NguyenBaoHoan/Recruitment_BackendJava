@@ -2,8 +2,8 @@ package com.example.jobhunter.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.jobhunter.domain.LoginDTO;
-import com.example.jobhunter.domain.RestLoginDTO;
+import com.example.jobhunter.domain.dto.LoginDTO;
+import com.example.jobhunter.domain.dto.RestLoginDTO;
 import com.example.jobhunter.util.error.SecurityUtil;
 
 import jakarta.validation.Valid;

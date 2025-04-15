@@ -1,4 +1,4 @@
-package com.example.jobhunter.domain;
+package com.example.jobhunter.domain.dto;
 
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotBlank;

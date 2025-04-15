@@ -28,7 +28,7 @@ import com.nimbusds.jose.util.Base64;
 public class SecurityConfiguration {
 
     @Value("${hoan.jwt.base64-secret}")
-    private String jwtKey;
+    private String jwtKey;  
 
     @Bean
     public PasswordEncoder passwordEncoder() {
