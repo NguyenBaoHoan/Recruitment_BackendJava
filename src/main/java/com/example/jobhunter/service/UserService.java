@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.example.jobhunter.domain.User;
 import com.example.jobhunter.domain.dto.Meta;
@@ -35,20 +36,20 @@ public class UserService {
         return null;
     }
 
-    public List<User> fetchAllUser(Pageable pageable) {
-        Page<User> pageUser = this.userRepository.findAll(pageable);
+    public List<User> fetchAllUser(Specification<User> pageble) {
+        List<User> pageUser = this.userRepository.findAll(pageble);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         Meta mt = new Meta();
 
-        mt.setPage(pageUser.getNumber() + 1);
-        mt.setPageSize(pageUser.getSize());
+        // mt.setPage(pageUser.getNumber() + 1);
+        // mt.setPageSize(pageUser.getSize());
 
-        mt.setPages(pageUser.getTotalPages());
-        mt.setTotal(pageUser.getTotalElements());
+        // mt.setPages(pageUser.getTotalPages());
+        // mt.setTotal(pageUser.getTotalElements());
 
         rs.setMeta(mt);
-        rs.setResult(pageUser.getContent());
-        return pageUser.getContent();
+        rs.setResult(pageUser);
+        return pageUser;
     }
     // update
 

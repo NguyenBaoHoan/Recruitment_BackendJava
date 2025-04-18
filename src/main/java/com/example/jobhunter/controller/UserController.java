@@ -2,14 +2,14 @@ package com.example.jobhunter.controller;
 
 import java.util.List;
 import java.util.Optional;
-
+import com.turkraft.springfilter.boot.Filter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +21,6 @@ import com.example.jobhunter.domain.User;
 import com.example.jobhunter.service.UserService;
 import com.example.jobhunter.util.error.IdInvalidException;
 
-import jakarta.websocket.server.PathParam;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -65,6 +64,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> fetchAllUser(
+            @Filter Specification<User> spec,
             @RequestParam("current") Optional<String> currentOptional,
             @RequestParam("pageSize") Optional<String> pageSizeOptional) {
         String sCurrent = currentOptional.isPresent() ? currentOptional.get() : "";
@@ -74,7 +74,7 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(current - 1, pageSize);
 
-        return ResponseEntity.status(HttpStatus.OK).body(userService.fetchAllUser(pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.fetchAllUser(spec));
     }
 
     @PutMapping("/update")
