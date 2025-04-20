@@ -36,20 +36,20 @@ public class UserService {
         return null;
     }
 
-    public List<User> fetchAllUser(Specification<User> pageble) {
-        List<User> pageUser = this.userRepository.findAll(pageble);
+    public ResultPaginationDTO fetchAllUser(Specification<User> pageble, Pageable pageable) {
+        Page<User> pageUser = this.userRepository.findAll(pageble, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         Meta mt = new Meta();
 
-        // mt.setPage(pageUser.getNumber() + 1);
-        // mt.setPageSize(pageUser.getSize());
+        mt.setPage(pageUser.getNumber());
+        mt.setPageSize(pageUser.getSize());
 
-        // mt.setPages(pageUser.getTotalPages());
-        // mt.setTotal(pageUser.getTotalElements());
+        mt.setPages(pageUser.getTotalPages());
+        mt.setTotal(pageUser.getTotalElements());
 
         rs.setMeta(mt);
-        rs.setResult(pageUser);
-        return pageUser;
+        rs.setResult(pageUser.getContent());
+        return rs;
     }
     // update
 

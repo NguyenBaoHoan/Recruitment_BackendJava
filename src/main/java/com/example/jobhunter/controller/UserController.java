@@ -3,6 +3,8 @@ package com.example.jobhunter.controller;
 import java.util.List;
 import java.util.Optional;
 import com.turkraft.springfilter.boot.Filter;
+
+import org.hibernate.query.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jobhunter.domain.User;
+import com.example.jobhunter.domain.dto.ResultPaginationDTO;
 import com.example.jobhunter.service.UserService;
 import com.example.jobhunter.util.error.IdInvalidException;
 
@@ -63,18 +66,20 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> fetchAllUser(
+    public ResponseEntity<ResultPaginationDTO> fetchAllUser(
             @Filter Specification<User> spec,
             @RequestParam("current") Optional<String> currentOptional,
-            @RequestParam("pageSize") Optional<String> pageSizeOptional) {
-        String sCurrent = currentOptional.isPresent() ? currentOptional.get() : "";
-        String sPageSize = pageSizeOptional.isPresent() ? pageSizeOptional.get() : "";
-        int current = Integer.parseInt(sCurrent);
-        int pageSize = Integer.parseInt(sPageSize);
+            @RequestParam("pageSize") Optional<String> pageSizeOptional,
+            Pageable pageable) {
+        // String sCurrent = currentOptional.isPresent() ? currentOptional.get() : "";
+        // String sPageSize = pageSizeOptional.isPresent() ? pageSizeOptional.get() :
+        // "";
+        // int current = Integer.parseInt(sCurrent);
+        // int pageSize = Integer.parseInt(sPageSize);
 
-        Pageable pageable = PageRequest.of(current - 1, pageSize);
+        // Pageable pageable = PageRequest.of(current - 1, pageSize);
 
-        return ResponseEntity.status(HttpStatus.OK).body(userService.fetchAllUser(spec));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.fetchAllUser(spec, pageable));
     }
 
     @PutMapping("/update")
