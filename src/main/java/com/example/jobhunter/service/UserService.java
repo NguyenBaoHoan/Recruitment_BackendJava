@@ -36,12 +36,12 @@ public class UserService {
         return null;
     }
 
-    public ResultPaginationDTO fetchAllUser(Specification<User> pageble, Pageable pageable) {
-        Page<User> pageUser = this.userRepository.findAll(pageble, pageable);
+    public ResultPaginationDTO fetchAllUser(Specification<User> spec, Pageable pageable) {
+        Page<User> pageUser = this.userRepository.findAll(spec, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         Meta mt = new Meta();
 
-        mt.setPage(pageUser.getNumber());
+        mt.setPage(pageUser.getNumber() + 1);
         mt.setPageSize(pageUser.getSize());
 
         mt.setPages(pageUser.getTotalPages());
@@ -67,5 +67,9 @@ public class UserService {
 
     public User handleGetUserByEmail(String username) {
         return this.userRepository.findByEmail(username);
+    }
+
+    public boolean isEmailExist(String username){
+        return userRepository.existsByEmail(username);
     }
 }

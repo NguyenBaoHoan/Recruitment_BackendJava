@@ -41,13 +41,18 @@ public class UserController {
 
     // create one user
     @PostMapping("/create")
-    public ResponseEntity<User> createNewUser(@RequestBody User postManUser) {
+    public ResponseEntity<User> createNewUser(@RequestBody User postManUser) throws IdInvalidException {
+        boolean existUser = this.userService.isEmailExist(postManUser.getEmail());
+        if (existUser) {
+            throw new IdInvalidException(
+                "Email" + postManUser.getEmail() + "Email này đã được sử dụng!!!");
+        }
         String hashPassword = this.passwordEncoder.encode(postManUser.getPassWord());
         postManUser.setPassWord((hashPassword));
         User newUser = userService.handleSaveUser(postManUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
-
+ 
     // delete by id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> DeleteUser(@PathVariable("id") long id) throws IdInvalidException {
@@ -68,16 +73,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<ResultPaginationDTO> fetchAllUser(
             @Filter Specification<User> spec,
-            @RequestParam("current") Optional<String> currentOptional,
-            @RequestParam("pageSize") Optional<String> pageSizeOptional,
             Pageable pageable) {
-        // String sCurrent = currentOptional.isPresent() ? currentOptional.get() : "";
-        // String sPageSize = pageSizeOptional.isPresent() ? pageSizeOptional.get() :
-        // "";
-        // int current = Integer.parseInt(sCurrent);
-        // int pageSize = Integer.parseInt(sPageSize);
-
-        // Pageable pageable = PageRequest.of(current - 1, pageSize);
 
         return ResponseEntity.status(HttpStatus.OK).body(userService.fetchAllUser(spec, pageable));
     }
