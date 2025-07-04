@@ -1,48 +1,38 @@
 package com.example.jobhunter.domain;
 
 import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
-import com.example.jobhunter.util.constant.GenderEnum;
 import com.example.jobhunter.util.error.SecurityUtil;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Column;
 
 @Entity
-@Getter
-@Setter
-public class User {
+@Table(name = "skills")
+@Data
+public class Skills {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
+    
+    @NotBlank
+    @Column(unique = true, nullable = false)
     private String name;
-    @NotBlank(message = "you cann't leave blank")
-    private String email;
-    @NotBlank(message = "you cann't leave blank")
-    private String passWord;
-
-    private int age;
-
-    @Enumerated(EnumType.STRING)
-    private GenderEnum gender;
-
-    private String address;
-    @Column(columnDefinition = "MEDIUMTEXT")
-    private String refreshToken;
     private Instant createdAt;
     private Instant updateAt;
     private String createdBy;
@@ -51,6 +41,9 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
+
+    @ManyToMany(mappedBy = "skills")
+    private List<Job> jobs;
 
     @PrePersist
     public void handleCreateAt() {

@@ -1,4 +1,4 @@
-package com.example.jobhunter.controller.response.file;
+package com.example.jobhunter.dto.response;
 
 import java.time.Instant;
 

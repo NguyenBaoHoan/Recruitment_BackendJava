@@ -1,4 +1,4 @@
-package com.example.jobhunter.domain.dto;
+package com.example.jobhunter.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

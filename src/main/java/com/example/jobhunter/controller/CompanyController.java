@@ -4,13 +4,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jobhunter.domain.Company;
 import com.example.jobhunter.domain.User;
-import com.example.jobhunter.domain.dto.ResultPaginationDTO;
+import com.example.jobhunter.dto.response.ResultPaginationDTO;
+import com.example.jobhunter.repository.CompanyRepository;
+import com.example.jobhunter.repository.UserRepository;
 import com.example.jobhunter.service.CompanyService;
+import com.example.jobhunter.service.UserService;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,9 +35,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 public class CompanyController {
     private final CompanyService companyService;
+    private final CompanyRepository companyRepository;
+    private final UserRepository userRepository;
 
-    public CompanyController(CompanyService companyService) {
+    public CompanyController(CompanyService companyService, CompanyRepository companyRepository,
+            UserRepository userRepository) {
         this.companyService = companyService;
+        this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -55,9 +64,15 @@ public class CompanyController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteCompany(@PathVariable Long id) {
+    public void deleteCompany(@PathVariable("id") Long id) {
+        Optional<Company> company = companyRepository.findById(id);
+        if (company.isPresent()) {
+            Company com = company.get();
+            List<User> users = userRepository.findByCompany(com);
+            this.userRepository.deleteAll(users);
+
+        }
         companyService.handledeleteCompany(id);
-        return ResponseEntity.ok("Success");
     }
 
 }

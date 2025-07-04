@@ -14,8 +14,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.jobhunter.controller.RestResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalException {
@@ -31,6 +33,20 @@ public class GlobalException {
         res.setMessage("Exception occurs...");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 
+    }
+
+    @ExceptionHandler(value = { NoResourceFoundException.class })
+    public ResponseEntity<?> handleNotFoundException(Exception ex, HttpServletRequest request) throws Exception {
+        String path = request.getRequestURI();
+        if (path.startsWith("/api/")) {
+            RestResponse<Object> res = new RestResponse<>();
+            res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            res.setError(ex.getMessage());
+            res.setMessage("404 Not Found, URL may not exist...");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        } else {
+            throw ex;
+        }
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)

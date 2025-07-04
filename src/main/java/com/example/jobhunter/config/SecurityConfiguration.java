@@ -1,4 +1,3 @@
-
 package com.example.jobhunter.config;
 
 import javax.crypto.SecretKey;
@@ -17,6 +16,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.example.jobhunter.util.error.SecurityUtil;
@@ -28,7 +29,7 @@ import com.nimbusds.jose.util.Base64;
 public class SecurityConfiguration {
 
     @Value("${hoan.jwt.base64-secret}")
-    private String jwtKey;  
+    private String jwtKey;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,7 +42,15 @@ public class SecurityConfiguration {
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(  "/login", "/storage/**").permitAll()
+                        .requestMatchers(
+                                "/storage/**",
+                                "/api/v1/auth/login",
+                                "/companys/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api/v1/auth/refresh")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(f -> f.disable())
@@ -74,4 +83,15 @@ public class SecurityConfiguration {
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, SecurityUtil.JWT_ALGORITHM.getName());
     }
 
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthenticationConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthenticationConverter.setAuthorityPrefix("");
+        grantedAuthenticationConverter.setAuthoritiesClaimName("permission");
+
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthenticationConverter);
+        return jwtAuthenticationConverter;
+
+    }
 }

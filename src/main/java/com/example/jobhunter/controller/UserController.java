@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jobhunter.domain.User;
-import com.example.jobhunter.domain.dto.ResultPaginationDTO;
+import com.example.jobhunter.dto.response.*;
+import com.example.jobhunter.dto.response.ResUserDTO;
+import com.example.jobhunter.dto.request.*;
 import com.example.jobhunter.service.UserService;
 import com.example.jobhunter.util.error.IdInvalidException;
 
@@ -41,7 +43,7 @@ public class UserController {
 
     // create one user
     @PostMapping("/create")
-    public ResponseEntity<User> createNewUser(@RequestBody User postManUser) throws IdInvalidException {
+    public ResponseEntity<ResCreateUserDTO> createNewUser(@RequestBody User postManUser) throws IdInvalidException {
         boolean existUser = this.userService.isEmailExist(postManUser.getEmail());
         if (existUser) {
             throw new IdInvalidException(
@@ -50,9 +52,8 @@ public class UserController {
         String hashPassword = this.passwordEncoder.encode(postManUser.getPassWord());
         postManUser.setPassWord((hashPassword));
         User newUser = userService.handleSaveUser(postManUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(newUser));
     }
- 
     // delete by id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> DeleteUser(@PathVariable("id") long id) throws IdInvalidException {
@@ -65,9 +66,9 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> fetchUserById(@PathVariable("id") long id) {
+    public ResponseEntity<ResUserDTO> fetchUserById(@PathVariable("id") long id) {
         User newUser = userService.fetchOneUser(id);
-        return ResponseEntity.status(HttpStatus.OK).body(newUser);
+        return ResponseEntity.status(HttpStatus.OK).body(userService.convertToResUserDTO(newUser));
     }
 
     @GetMapping

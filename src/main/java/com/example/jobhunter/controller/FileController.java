@@ -3,7 +3,7 @@ package com.example.jobhunter.controller;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.jobhunter.controller.response.file.ResUploadFileDTO;
+import com.example.jobhunter.dto.response.ResUploadFileDTO;
 import com.example.jobhunter.service.FileService;
 import com.example.jobhunter.util.anotation.ApiMessage;
 

@@ -1,9 +1,9 @@
-package com.example.jobhunter.domain.dto;
+package com.example.jobhunter.dto.request;
 
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotBlank;
 
-public class LoginDTO {
+public class ReqLoginDTO {
     @NotBlank(message = "user name can't be empty")
     private String userName;
     @NotBlank(message = "password cann't be blank")

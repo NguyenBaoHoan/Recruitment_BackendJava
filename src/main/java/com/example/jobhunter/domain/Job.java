@@ -1,76 +1,71 @@
 package com.example.jobhunter.domain;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
+import com.example.jobhunter.util.constant.LevelEnum;
 import com.example.jobhunter.util.error.SecurityUtil;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Table(name = "companies")
-@Getter
-@Setter
+@Table(name = "jobs")
 @Entity
-public class Company {
+@Data
+public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotBlank(message = "name không được để trống")
     private String name;
+    private String location;
+    private double salary;
+    private int quantity;
+    @Enumerated(EnumType.STRING)
+    private LevelEnum level;
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
-
-    private String address;
-
-    private String logo;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
-    private Instant updateAt;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    private Date startDate;
+    private Date endDate;
+    private boolean isActive;
     private Instant createAt;
-
+    private Instant updateAt;
+    private String createBy;
     private String updateBy;
 
-    private String createBy;
-
-    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<User> users;
-
-    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
-    @JsonFormat
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = {"jobs"})
+    @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
     private List<Skills> skills;
-    
     @PrePersist
     public void handleCreateAt() {
         this.createBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
         this.createAt = Instant.now();
+
     }
 
     @PreUpdate
-    public void handleUpdateAt()
-    {
+    public void handleUpdateAt() {
         this.updateBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
         this.updateAt = Instant.now();
     }
-
 }
