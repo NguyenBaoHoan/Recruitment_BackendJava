@@ -1,5 +1,6 @@
 package com.example.jobhunter.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class SkillService {
         this.skillRepository = skillRepository;
     }
 
-    public Skills handleSaveSkill(Skills skill) {
-        return skillRepository.save(skill);
+    public List<Skills> handleSaveSkill(List<Skills> skills) {
+        return skillRepository.saveAll(skills);
     }
 
     public void handleDeleteSkill(long id) {

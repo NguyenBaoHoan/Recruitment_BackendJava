@@ -1,5 +1,6 @@
 package com.example.jobhunter.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -46,10 +47,10 @@ public class SkillController {
     }
 
     @PostMapping()
-    public ResponseEntity<Skills> createSkill(@Valid @RequestBody Skills skill) {
+    public ResponseEntity<List<Skills>> createSkill(@Valid @RequestBody List<Skills> skills) {
 
-        Skills newSk =  skillService.handleSaveSkill(skill);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newSk);
+        List<Skills> newSkills =  skillService.handleSaveSkill(skills);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newSkills);   
     }
 
     @PutMapping("/{id}")
@@ -71,6 +72,8 @@ public class SkillController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSkill(@PathVariable("id") long id) {
         Optional<Skills> skillOptional = skillRepository.findById(id);
+
+        
         Skills currentSkill = skillOptional.get();
         currentSkill.getJobs().forEach(job -> {
             job.getSkills().remove(currentSkill);

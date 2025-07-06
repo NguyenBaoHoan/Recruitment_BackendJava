@@ -55,7 +55,7 @@ public class Company {
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @JsonFormat
     private List<Skills> skills;
-    
+
     @PrePersist
     public void handleCreateAt() {
         this.createBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
@@ -65,8 +65,7 @@ public class Company {
     }
 
     @PreUpdate
-    public void handleUpdateAt()
-    {
+    public void handleUpdateAt() {
         this.updateBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
