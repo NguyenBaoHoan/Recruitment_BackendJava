@@ -50,7 +50,4 @@ public class Resume {
         this.updatedAt = Instant.now();
     }
 
-    public enum Status {
-        PENDING, REVIEWING, APPROVED, REJECTED
-    }
 }
