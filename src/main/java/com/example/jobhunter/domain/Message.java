@@ -28,6 +28,8 @@ public class Message {
     @Column(columnDefinition = "MEDIUMTEXT")
     private String content;
 
+    private String senderName;
+
     private Instant createdAt;
 
     @PrePersist

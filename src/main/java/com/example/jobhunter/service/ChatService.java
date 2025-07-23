@@ -49,13 +49,51 @@ public class ChatService {
      * Lấy danh sách các phòng chat của một người dùng.
      */
     public List<ChatRoomDTO> findRoomsForUser(Long userId) {
+        System.out.println("=== DEBUG: Finding rooms for user: " + userId + " ===");
         List<ChatRoom> chatRooms = chatRoomRepository.findByParticipants_Id(userId);
-        // Logic chuyển đổi sang ChatRoomDTO (cần thêm logic để lấy tin nhắn cuối cùng)
-        // Đây là ví dụ đơn giản
+        System.out.println("Found " + chatRooms.size() + " chat rooms");
+
         return chatRooms.stream().map(room -> {
+            System.out.println("Processing room ID: " + room.getId());
+            System.out.println("Room participants count: " + room.getParticipants().size());
+            System.out.println("Room participants IDs: " + room.getParticipants().stream()
+                    .map(p -> String.valueOf(p.getId()))
+                    .collect(Collectors.joining(", ")));
+
             ChatRoomDTO dto = new ChatRoomDTO();
             dto.setId(room.getId());
-            // Thêm logic để tìm thông tin người còn lại và tin nhắn cuối
+
+            // Tìm ID của người còn lại trong phòng chat
+            Long otherParticipantId = room.getParticipants().stream()
+                    .map(User::getId)
+                    .filter(id -> !id.equals(userId))
+                    .findFirst()
+                    .orElse(null);
+
+            System.out.println("Other participant ID found: " + otherParticipantId);
+            dto.setParticipantId(otherParticipantId);
+
+            // Lấy thông tin người còn lại
+            if (otherParticipantId != null) {
+                User otherParticipant = userRepository.findById(otherParticipantId).orElse(null);
+                if (otherParticipant != null) {
+                    dto.setParticipantName(otherParticipant.getDisplayName());
+                    dto.setParticipantPhotoUrl(otherParticipant.getPhotoUrl());
+                    System.out.println("Other participant name: " + otherParticipant.getDisplayName());
+                }
+            }
+
+            // Lấy tin nhắn cuối cùng
+            List<Message> messages = messageRepository.findByChatRoomIdOrderByCreatedAtDesc(room.getId());
+            if (!messages.isEmpty()) {
+                Message lastMessage = messages.get(0);
+                dto.setLastMessage(lastMessage.getContent());
+                dto.setLastMessageTimestamp(lastMessage.getCreatedAt());
+            }
+
+            System.out.println("Final DTO participantId: " + dto.getParticipantId());
+            System.out.println("=== END DEBUG ===");
+
             return dto;
         }).collect(Collectors.toList());
     }
@@ -80,6 +118,7 @@ public class ChatService {
 
         // Tạo và lưu tin nhắn
         Message message = new Message();
+        message.setSenderName(payload.getSenderName());
         message.setChatRoom(chatRoom);
         message.setSender(sender);
         message.setContent(payload.getContent());
@@ -128,6 +167,7 @@ public class ChatService {
         dto.setId(message.getId());
         dto.setChatRoomId(message.getChatRoom().getId());
         dto.setContent(message.getContent());
+        dto.setSenderName(message.getSenderName());
         dto.setTimestamp(message.getCreatedAt());
         dto.setMessageType(message.getMessageType());
         if (message.getSender() != null) {

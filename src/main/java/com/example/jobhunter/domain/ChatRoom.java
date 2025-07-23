@@ -7,6 +7,7 @@ import java.util.List;
 import com.example.jobhunter.util.error.SecurityUtil;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -20,12 +21,12 @@ import lombok.Data;
 @Data
 public class ChatRoom {
     @Id
-    
+
     private String id; // Sử dụng String ID thay vì auto-generated
 
     private Instant lastUpdated;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "chat_room_participants", joinColumns = @JoinColumn(name = "chat_room_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> participants = new ArrayList<>();
 

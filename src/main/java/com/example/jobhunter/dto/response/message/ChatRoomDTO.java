@@ -6,8 +6,9 @@ import lombok.Data;
 @Data
 public class ChatRoomDTO {
     private String id;
-    private String otherParticipantName;
-    private String otherParticipantPhotoUrl;
+    private Long participantId; // Thêm trường này để Flutter biết ID người còn lại
+    private String participantName;
+    private String participantPhotoUrl;
     private String lastMessage;
     private Instant lastMessageTimestamp;
 }
