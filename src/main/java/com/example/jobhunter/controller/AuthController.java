@@ -10,6 +10,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import com.example.jobhunter.dto.request.ReqRegisterDTO;
+import com.example.jobhunter.service.AuthService;
+
 import com.example.jobhunter.domain.User;
 import com.example.jobhunter.dto.request.ReqLoginDTO;
 import com.example.jobhunter.dto.response.ResLoginDTO;
@@ -44,20 +47,30 @@ public class AuthController {
         private final SecurityUtil securityUtil;
         private UserService userService;
         private final GoogleIdTokenVerifier googleIdTokenVerifier;
+        private final AuthService authService;
 
         @Value("${hoan.jwt.access-token-validity-in-seconds}")
         private long refreshTokenExpiration;
 
         public AuthController(
-                AuthenticationManagerBuilder authenticationManagerBuilder, 
+                AuthenticationManagerBuilder authenticationManagerBuilder,
                 SecurityUtil securityUtil,
                 UserService userService,
-                GoogleIdTokenVerifier googleIdTokenVerifier // Thêm tham số này
+                GoogleIdTokenVerifier googleIdTokenVerifier,
+                AuthService authService // Thêm tham số này
         ) {
                 this.authenticationManagerBuilder = authenticationManagerBuilder;
                 this.securityUtil = securityUtil;
                 this.userService = userService;
-                this.googleIdTokenVerifier = googleIdTokenVerifier; // Gán giá trị
+                this.googleIdTokenVerifier = googleIdTokenVerifier;
+                this.authService = authService; // Gán giá trị
+        }
+
+        @PostMapping("/register")
+        @ApiMessage("Tạo người dùng mới")
+        public ResponseEntity<User> register(@Valid @RequestBody ReqRegisterDTO reqRegisterDTO) throws IdInvalidException {
+                User newUser = this.authService.register(reqRegisterDTO);
+                return ResponseEntity.ok(newUser);
         }
 
         @PostMapping("/login")

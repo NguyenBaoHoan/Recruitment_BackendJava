@@ -3,6 +3,8 @@ package com.example.jobhunter.config;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 
 // Import for google account
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -51,6 +53,11 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
     public SecurityFilterChain fillterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(c -> c.disable())
@@ -59,6 +66,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/storage/**",
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/register",
                                 "/api/v1/auth/google",
                                 "/companys/**",
                                 "/v3/api-docs/**",
