@@ -7,12 +7,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.jobhunter.domain.Job;
+import com.example.jobhunter.domain.SkillRepository;
 import com.example.jobhunter.domain.Skills;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
 import com.example.jobhunter.dto.response.job.ResCreateJobDTO;
 import com.example.jobhunter.dto.response.job.ResUpdateJobDTO;
 import com.example.jobhunter.repository.JobRepository;
-import com.example.jobhunter.repository.SkillRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,8 +58,12 @@ public class JobService {
         rs.setName(curJob.getName());
         rs.setLocation(curJob.getLocation());
         rs.setSalary(curJob.getSalary());
-        rs.setQuantity(curJob.getQuantity());
-        rs.setLevel(curJob.getLevel());
+        rs.setEducationLevel(curJob.getEducationLevel());
+        rs.setJobType(curJob.getJobType());
+        rs.setDescription(curJob.getDescription());
+        rs.setRequirements(curJob.getRequirements());
+        rs.setBenefits(curJob.getBenefits());
+        rs.setWorkAddress(curJob.getWorkAddress());
         rs.setStartDate(curJob.getStartDate());
         rs.setEndDate(curJob.getEndDate());
         rs.setActive(curJob.isActive());
@@ -89,9 +93,11 @@ public class JobService {
         curJob.setName(job.getName());
         curJob.setLocation(job.getLocation());
         curJob.setSalary(job.getSalary());
-        curJob.setQuantity(job.getQuantity());
-        curJob.setLevel(job.getLevel());
+        curJob.setEducationLevel(job.getEducationLevel());
         curJob.setDescription(job.getDescription());
+        curJob.setRequirements(job.getRequirements());
+        curJob.setBenefits(job.getBenefits());
+        curJob.setWorkAddress(job.getWorkAddress());
         curJob.setStartDate(job.getStartDate());
         curJob.setEndDate(job.getEndDate());
         curJob.setActive(job.isActive());
@@ -113,8 +119,8 @@ public class JobService {
         rs.setName(updatedJob.getName());
         rs.setLocation(updatedJob.getLocation());
         rs.setSalary(updatedJob.getSalary());
-        rs.setQuantity(updatedJob.getQuantity());
-        rs.setLevel(updatedJob.getLevel());
+        rs.setEducationLevel(updatedJob.getEducationLevel());
+        rs.setJobType(updatedJob.getJobType());
         rs.setDescription(updatedJob.getDescription());
         rs.setStartDate(new java.sql.Date(updatedJob.getStartDate().getTime()));
         rs.setEndDate(new java.sql.Date(updatedJob.getEndDate().getTime()));

@@ -34,12 +34,21 @@ public class Job {
     private long id;
     private String name;
     private String location;
-    private double salary;
-    private int quantity;
+    private String salary;
     @Enumerated(EnumType.STRING)
-    private LevelEnum level;
+    private LevelEnum educationLevel;
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String jobType;
+    // Trong entity Job, thêm annotation cho các field List
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String requirements;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String benefits;
+    private String workAddress;
     private Date startDate;
     private Date endDate;
     private boolean isActive;
@@ -49,11 +58,10 @@ public class Job {
     private String updatedBy;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = {"jobs"})
+    @JsonIgnoreProperties(value = { "jobs", "hibernateLazyInitializer", "handler" })
     @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
     private List<Skills> skills;
 
-    
     @PrePersist
     public void handleCreateAt() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true

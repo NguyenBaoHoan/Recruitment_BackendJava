@@ -1,51 +1,41 @@
 package com.example.jobhunter.domain;
 
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 import com.example.jobhunter.util.error.SecurityUtil;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import jakarta.persistence.Table;
-import lombok.Data;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
 
+@Table(name = "favorite_jobs")
 @Entity
-@Table(name = "skills")
 @Data
-public class Skills {
+public class FavoriteJob {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank
-    @Column(unique = true, nullable = false)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id")
+    private Job job;
+
     private Instant createdAt;
-    private Instant updateAt;
+    private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
-
-    @ManyToMany(mappedBy = "skills")
-    @JsonIgnoreProperties(value = { "skills", "hibernateLazyInitializer", "handler" })
-    private List<Job> jobs;
 
     @PrePersist
     public void handleCreateAt() {
@@ -60,6 +50,6 @@ public class Skills {
         this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
-        this.updateAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 }

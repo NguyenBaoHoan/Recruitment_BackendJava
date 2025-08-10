@@ -194,4 +194,30 @@ public class UserService {
     public User getUserByRefreshTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
+
+    // google account
+    public User findOrCreateUserFromGoogle(com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload payload) {
+        String email = payload.getEmail();
+        java.util.Optional<User> existingUserOptional = java.util.Optional.ofNullable(this.userRepository.findByEmail(email));
+
+        if (existingUserOptional.isPresent()) {
+            // Nếu người dùng đã tồn tại, cập nhật thông tin và trả về
+            User existingUser = existingUserOptional.get();
+            existingUser.setName((String) payload.get("name"));
+            existingUser.setPhotoUrl((String) payload.get("picture"));
+            return this.userRepository.save(existingUser);
+            
+        } else {
+            // Nếu chưa tồn tại, tạo người dùng mới
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setName((String) payload.get("name"));
+            newUser.setPhotoUrl((String) payload.get("picture"));
+            
+            // Quan trọng: Tài khoản đăng nhập bằng Google không có mật khẩu trong hệ thống của bạn
+            newUser.setPassWord(null); 
+            
+            return this.userRepository.save(newUser);
+        }
+    }
 }
