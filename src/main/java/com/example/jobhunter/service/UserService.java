@@ -1,37 +1,41 @@
+// File: service/UserService.java
 package com.example.jobhunter.service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
 import com.example.jobhunter.domain.Company;
 import com.example.jobhunter.domain.User;
 import com.example.jobhunter.dto.response.ResCreateUserDTO;
 import com.example.jobhunter.dto.response.ResUserDTO;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
-import com.example.jobhunter.dto.response.ResultPaginationDTO.Meta;
 import com.example.jobhunter.repository.CompanyRepository;
 import com.example.jobhunter.repository.UserRepository;
+import com.example.jobhunter.util.error.IdInvalidException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder; // <<< NEW IMPORT
+import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private UserRepository userRepository;
-    @Autowired
-    @Lazy
-    private final CompanyRepository companyRepository;
 
-    public UserService(UserRepository userRepository,
-            CompanyRepository companyRepository) {
-        this.companyRepository = companyRepository;
+  private final UserRepository userRepository;
+  private final CompanyRepository companyRepository;
+  private final PasswordEncoder passwordEncoder; // <<< NEW FIELD
+
+    // <<< MODIFIED CONSTRUCTOR >>>
+    public UserService(
+        UserRepository userRepository,
+        CompanyRepository companyRepository,
+        PasswordEncoder passwordEncoder
+    ) {
         this.userRepository = userRepository;
-
+        this.companyRepository = companyRepository;
+        this.passwordEncoder = passwordEncoder; // Set the new field
     }
 
     public User handleSaveUser(User user) {
@@ -43,6 +47,7 @@ public class UserService {
         }
         return userRepository.save(user);
     }
+
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
@@ -97,6 +102,24 @@ public class UserService {
 
         return rs;
     }
+
+    public String getCVPath(Long userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            return userOpt.get().getCvPath();
+        }
+        return null;
+    }
+
+    public void saveCVPath(Long userId, String cvPath) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setCvPath(cvPath);
+            userRepository.save(user);
+        }
+    }
+
     // update
 
     public User handleUpdateUser(User reqUser) {
@@ -105,13 +128,13 @@ public class UserService {
             currentUser.setName(reqUser.getName());
             currentUser.setEmail(reqUser.getEmail());
             currentUser.setPassWord(reqUser.getPassWord());
-//check company
-if(reqUser.getCompany() != null){
-    Optional<Company> CompanyOptional = companyRepository.findById(reqUser.getCompany().getId());
-    if(CompanyOptional.isPresent()){
-        currentUser.setCompany(CompanyOptional.get());
-    }
-}
+            // check company
+            if (reqUser.getCompany() != null) {
+                Optional<Company> CompanyOptional = companyRepository.findById(reqUser.getCompany().getId());
+                if (CompanyOptional.isPresent()) {
+                    currentUser.setCompany(CompanyOptional.get());
+                }
+            }
             currentUser = userRepository.save(currentUser);
         }
         return currentUser;
@@ -174,5 +197,38 @@ if(reqUser.getCompany() != null){
 
     public User getUserByRefreshTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
+    }
+
+  // <<< NEW METHOD ADDED >>>
+  /**
+   * Handles changing a user's password after verifying the old one.
+   *
+   * @param email The email of the logged-in user.
+   * @param oldPassword The user's current password.
+   * @param newPassword The new password to set.
+   * @throws IdInvalidException if the user is not found or the old password is incorrect.
+   */
+
+    public void handleChangePassword(
+        String email,
+        String oldPassword,
+        String newPassword
+    ) throws IdInvalidException {
+        User currentUser = this.userRepository.findByEmail(email);
+        if (currentUser == null) {
+        throw new IdInvalidException("User not found");
+        }
+
+        // Check if the old password matches
+        if (
+        currentUser.getPassWord() == null ||
+        !this.passwordEncoder.matches(oldPassword, currentUser.getPassWord())
+        ) {
+        throw new IdInvalidException("Mật khẩu cũ không chính xác.");
+        }
+
+        // Update with the new, encoded password
+        currentUser.setPassWord(this.passwordEncoder.encode(newPassword));
+        this.userRepository.save(currentUser);
     }
 }
