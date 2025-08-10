@@ -31,7 +31,6 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "users")
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,6 +51,8 @@ public class User {
     private Instant updateAt;
     private String createdBy;
     private String updatedBy;
+    @Column(name = "cv_path")
+    private String cvPath; // Đường dẫn đến CV của người dùng
 
     // phan chat
     private String displayName;

@@ -43,14 +43,22 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(
-                                "/storage/**",
-                                "/api/v1/auth/login",
+                                "/uploads/**",
+                                "/api/v1/auth/**",
+                                "/api/v1/jobs/**",
+                                "/api/v1/chat/**",
+                                "/api/v1/files/**",
+                                "/api/v1/users/**",
+                                "/api/v1/portfolio/**",
+                                "/users/**",
+                                "/actuator/**",
                                 "/companys/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/ws/**",
-                                "/api/v1/auth/refresh")
+                                "/error",
+                                "/")
                         .permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))

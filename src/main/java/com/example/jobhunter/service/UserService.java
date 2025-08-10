@@ -43,6 +43,7 @@ public class UserService {
         }
         return userRepository.save(user);
     }
+
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
@@ -97,6 +98,24 @@ public class UserService {
 
         return rs;
     }
+
+    public String getCVPath(Long userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            return userOpt.get().getCvPath();
+        }
+        return null;
+    }
+
+    public void saveCVPath(Long userId, String cvPath) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setCvPath(cvPath);
+            userRepository.save(user);
+        }
+    }
+
     // update
 
     public User handleUpdateUser(User reqUser) {
@@ -105,13 +124,13 @@ public class UserService {
             currentUser.setName(reqUser.getName());
             currentUser.setEmail(reqUser.getEmail());
             currentUser.setPassWord(reqUser.getPassWord());
-//check company
-if(reqUser.getCompany() != null){
-    Optional<Company> CompanyOptional = companyRepository.findById(reqUser.getCompany().getId());
-    if(CompanyOptional.isPresent()){
-        currentUser.setCompany(CompanyOptional.get());
-    }
-}
+            // check company
+            if (reqUser.getCompany() != null) {
+                Optional<Company> CompanyOptional = companyRepository.findById(reqUser.getCompany().getId());
+                if (CompanyOptional.isPresent()) {
+                    currentUser.setCompany(CompanyOptional.get());
+                }
+            }
             currentUser = userRepository.save(currentUser);
         }
         return currentUser;
