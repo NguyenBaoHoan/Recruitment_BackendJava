@@ -3,6 +3,7 @@ package com.example.jobhunter.service;
 
 import com.example.jobhunter.domain.Company;
 import com.example.jobhunter.domain.User;
+import com.example.jobhunter.dto.request.ReqNotificationSettingsDTO;
 import com.example.jobhunter.dto.response.ResCreateUserDTO;
 import com.example.jobhunter.dto.response.ResUserDTO;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
@@ -223,4 +224,14 @@ public class UserService {
         currentUser.setPassWord(this.passwordEncoder.encode(newPassword));
         this.userRepository.save(currentUser);
     }
+
+    public void updateNotificationSettings(String email, ReqNotificationSettingsDTO dto) {
+    User currentUser = this.userRepository.findByEmail(email);
+    if (currentUser != null) {
+        currentUser.setNotifyNewMessages(dto.isNotifyNewMessages());
+        currentUser.setNotifyProfileUpdates(dto.isNotifyProfileUpdates());
+        currentUser.setNotifyJobSuggestions(dto.isNotifyJobSuggestions());
+        this.userRepository.save(currentUser);
+    }
+}
 }

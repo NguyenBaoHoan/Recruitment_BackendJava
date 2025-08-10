@@ -72,6 +72,16 @@ public class User {
     private String photoUrl;
     private String userType; // candidate, recruiter, admin
     
+    // Các trường boolean để lưu cài đặt thông báo.
+    @Column(name = "notify_new_messages", columnDefinition = "boolean default true")
+    private boolean notifyNewMessages = true;
+
+    @Column(name = "notify_profile_updates", columnDefinition = "boolean default true")
+    private boolean notifyProfileUpdates = true;
+
+    @Column(name = "notify_job_suggestions", columnDefinition = "boolean default false")
+    private boolean notifyJobSuggestions = false;
+
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
