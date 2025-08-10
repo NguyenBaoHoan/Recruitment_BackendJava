@@ -1,11 +1,9 @@
 package com.example.jobhunter.util.error;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,13 +24,12 @@ public class GlobalException {
             UsernameNotFoundException.class,
             BadCredentialsException.class
     })
-    public ResponseEntity<RestResponse<Object>> handleIdException(IdInvalidException idException) {
+    public ResponseEntity<RestResponse<Object>> handleIdException(Exception exception) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        res.setError(idException.getMessage());
+        res.setError(exception.getMessage());
         res.setMessage("Exception occurs...");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-
     }
 
     @ExceptionHandler(value = { NoResourceFoundException.class })

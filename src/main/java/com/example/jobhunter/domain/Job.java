@@ -56,7 +56,7 @@ public class Job {
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
-
+private String jobStatus;
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "jobs", "hibernateLazyInitializer", "handler" })
     @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
