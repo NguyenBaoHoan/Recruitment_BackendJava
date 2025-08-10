@@ -1,37 +1,41 @@
+// File: service/UserService.java
 package com.example.jobhunter.service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
 import com.example.jobhunter.domain.Company;
 import com.example.jobhunter.domain.User;
 import com.example.jobhunter.dto.response.ResCreateUserDTO;
 import com.example.jobhunter.dto.response.ResUserDTO;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
-import com.example.jobhunter.dto.response.ResultPaginationDTO.Meta;
 import com.example.jobhunter.repository.CompanyRepository;
 import com.example.jobhunter.repository.UserRepository;
+import com.example.jobhunter.util.error.IdInvalidException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder; // <<< NEW IMPORT
+import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private UserRepository userRepository;
-    @Autowired
-    @Lazy
-    private final CompanyRepository companyRepository;
 
-    public UserService(UserRepository userRepository,
-            CompanyRepository companyRepository) {
-        this.companyRepository = companyRepository;
+  private final UserRepository userRepository;
+  private final CompanyRepository companyRepository;
+  private final PasswordEncoder passwordEncoder; // <<< NEW FIELD
+
+    // <<< MODIFIED CONSTRUCTOR >>>
+    public UserService(
+        UserRepository userRepository,
+        CompanyRepository companyRepository,
+        PasswordEncoder passwordEncoder
+    ) {
         this.userRepository = userRepository;
-
+        this.companyRepository = companyRepository;
+        this.passwordEncoder = passwordEncoder; // Set the new field
     }
 
     public User handleSaveUser(User user) {
@@ -195,29 +199,36 @@ public class UserService {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
 
-    // google account
-    public User findOrCreateUserFromGoogle(com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload payload) {
-        String email = payload.getEmail();
-        java.util.Optional<User> existingUserOptional = java.util.Optional.ofNullable(this.userRepository.findByEmail(email));
+  // <<< NEW METHOD ADDED >>>
+  /**
+   * Handles changing a user's password after verifying the old one.
+   *
+   * @param email The email of the logged-in user.
+   * @param oldPassword The user's current password.
+   * @param newPassword The new password to set.
+   * @throws IdInvalidException if the user is not found or the old password is incorrect.
+   */
 
-        if (existingUserOptional.isPresent()) {
-            // Nếu người dùng đã tồn tại, cập nhật thông tin và trả về
-            User existingUser = existingUserOptional.get();
-            existingUser.setName((String) payload.get("name"));
-            existingUser.setPhotoUrl((String) payload.get("picture"));
-            return this.userRepository.save(existingUser);
-            
-        } else {
-            // Nếu chưa tồn tại, tạo người dùng mới
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setName((String) payload.get("name"));
-            newUser.setPhotoUrl((String) payload.get("picture"));
-            
-            // Quan trọng: Tài khoản đăng nhập bằng Google không có mật khẩu trong hệ thống của bạn
-            newUser.setPassWord(null); 
-            
-            return this.userRepository.save(newUser);
+    public void handleChangePassword(
+        String email,
+        String oldPassword,
+        String newPassword
+    ) throws IdInvalidException {
+        User currentUser = this.userRepository.findByEmail(email);
+        if (currentUser == null) {
+        throw new IdInvalidException("User not found");
         }
+
+        // Check if the old password matches
+        if (
+        currentUser.getPassWord() == null ||
+        !this.passwordEncoder.matches(oldPassword, currentUser.getPassWord())
+        ) {
+        throw new IdInvalidException("Mật khẩu cũ không chính xác.");
+        }
+
+        // Update with the new, encoded password
+        currentUser.setPassWord(this.passwordEncoder.encode(newPassword));
+        this.userRepository.save(currentUser);
     }
 }

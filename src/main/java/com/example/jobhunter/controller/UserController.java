@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import com.turkraft.springfilter.boot.Filter;
 
+import jakarta.validation.Valid;
+
 import org.hibernate.query.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,17 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jobhunter.domain.User;
 import com.example.jobhunter.dto.response.*;
-import com.example.jobhunter.dto.response.ResUserDTO;
 import com.example.jobhunter.dto.request.*;
 import com.example.jobhunter.service.UserService;
+import com.example.jobhunter.util.anotation.ApiMessage;
 import com.example.jobhunter.util.error.IdInvalidException;
+import com.example.jobhunter.dto.request.ReqChangePasswordDTO;
+import com.example.jobhunter.util.error.SecurityUtil;
 
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/users")
-
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -54,6 +57,7 @@ public class UserController {
         User newUser = userService.handleSaveUser(postManUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(newUser));
     }
+
     // delete by id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> DeleteUser(@PathVariable("id") long id) throws IdInvalidException {
@@ -83,5 +87,18 @@ public class UserController {
     public ResponseEntity<User> updateUserById(@RequestBody User user) {
         User ericUser = userService.handleUpdateUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(ericUser);
+    }
+
+    @PostMapping("/change-password")
+    @ApiMessage("Đổi mật khẩu thành công")
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ReqChangePasswordDTO req) throws IdInvalidException {
+        // Lấy email của người dùng đang đăng nhập từ token bảo mật
+        String email = SecurityUtil.getCurrentUserLogin()
+            .orElseThrow(() -> new IdInvalidException("Token không hợp lệ, không tìm thấy email người dùng."));
+        
+        // Gọi service để xử lý logic đổi mật khẩu
+        this.userService.handleChangePassword(email, req.getOldPassword(), req.getNewPassword());
+        
+        return ResponseEntity.ok("Đổi mật khẩu thành công!");
     }
 }
