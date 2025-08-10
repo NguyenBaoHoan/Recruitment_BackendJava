@@ -13,10 +13,15 @@ public class ResCreateJobDTO {
     private long id;
     private String name;
     private String location;
-    private double salary;
-    private int quantity;
-    private LevelEnum level;
+    private String salary;
+    private LevelEnum educationLevel;
+    private String jobType;
     private String description;
+    private String requirements;
+    private String benefits;
+    private String workAddress;
+    private String companyName;
+    private String companyLogoAsset;
     private Date startDate;
     private Date endDate;
     private boolean active;

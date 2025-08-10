@@ -1,7 +1,7 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.3.1" // ĐÃ SỬA: Dùng phiên bản 3.3.1 ổn định
-    id("io.spring.dependency-management") version "1.1.5" // ĐÃ SỬA: Dùng phiên bản tương thích
+    id("org.springframework.boot") version "3.3.9" // ĐÃ SỬA: Dùng phiên bản 3.3.1 ổn định
+    id("io.spring.dependency-management") version "1.1.7" // ĐÃ SỬA: Dùng phiên bản tương thích
     id("io.freefair.lombok") version "8.6"
 }
 

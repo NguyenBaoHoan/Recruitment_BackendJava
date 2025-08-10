@@ -9,9 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.example.jobhunter.domain.SkillRepository;
 import com.example.jobhunter.domain.Skills;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
-import com.example.jobhunter.repository.SkillRepository;
 
 @Service
 public class SkillService {
