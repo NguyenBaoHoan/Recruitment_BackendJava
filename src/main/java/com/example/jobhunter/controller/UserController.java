@@ -92,12 +92,8 @@ public class UserController {
     @PostMapping("/change-password")
     @ApiMessage("Đổi mật khẩu thành công")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ReqChangePasswordDTO req) throws IdInvalidException {
-        // Lấy email của người dùng đang đăng nhập từ token bảo mật
-        String email = SecurityUtil.getCurrentUserLogin()
-            .orElseThrow(() -> new IdInvalidException("Token không hợp lệ, không tìm thấy email người dùng."));
-        
-        // Gọi service để xử lý logic đổi mật khẩu
-        this.userService.handleChangePassword(email, req.getOldPassword(), req.getNewPassword());
+        // Lấy userId trực tiếp từ request body
+        this.userService.handleChangePassword(req.getUserId(), req.getOldPassword(), req.getNewPassword());
         
         return ResponseEntity.ok("Đổi mật khẩu thành công!");
     }
