@@ -3,6 +3,14 @@ package com.example.jobhunter.config;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+
+// Import for google account
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import java.util.Collections;
+
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +39,12 @@ public class SecurityConfiguration {
     @Value("${hoan.jwt.base64-secret}")
     private String jwtKey;
 
+
+    // THÊM VALUE NÀY ĐỂ LẤY GOOGLE CLIENT ID
+    @Value("${nghia.google.client-id}")
+    private String googleClientId;
+
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -45,6 +59,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/storage/**",
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/google",
                                 "/companys/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
