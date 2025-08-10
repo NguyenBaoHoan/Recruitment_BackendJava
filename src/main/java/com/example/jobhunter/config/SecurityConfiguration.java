@@ -51,9 +51,19 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(
-                                "/storage/**",
-                                "/api/v1/auth/login",
-                                "/api/v1/auth/register",
+                                "/uploads/**",
+                                "/api/v1/auth/**",
+                                "/api/v1/career-expectations/**",
+                                "/api/v1/jobs/**",
+                                "/api/v1/chat/**",
+                                "/api/v1/files/**",
+                                "/api/v1/users/**",
+                                "/api/v1/portfolio/**",
+                                "/api/v1/experiences/**",
+                                "/api/v1/skills/**",
+                                "/api/v1/educations/**",
+                                "/users/**",
+                                "/actuator/**",
                                 "/companys/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
