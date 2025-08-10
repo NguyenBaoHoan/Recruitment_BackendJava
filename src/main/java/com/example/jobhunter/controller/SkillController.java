@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.jobhunter.domain.Company;
+import com.example.jobhunter.domain.SkillRepository;
 import com.example.jobhunter.domain.Skills;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
-import com.example.jobhunter.repository.SkillRepository;
 import com.example.jobhunter.service.SkillService;
 import com.turkraft.springfilter.boot.Filter;
 

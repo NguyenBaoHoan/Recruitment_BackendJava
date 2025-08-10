@@ -1,51 +1,157 @@
-# Chat API Testing - JobHunter
+# Hướng dẫn Test Realtime Chat cho JobHunter Backend
 
-## Quick Start
+## Yêu cầu
 
-### 1. Chuẩn Bị Dữ Liệu
+1. **Server đang chạy**: Đảm bảo Spring Boot server đang chạy trên `localhost:8080`
+2. **Python**: Cài đặt Python 3.7+ và thư viện `websockets`
+3. **cURL**: Để test HTTP endpoints
+
+## Cài đặt dependencies
+
 ```bash
-# Chạy SQL script để tạo dữ liệu test
-mysql -u root -p jobhunter < test_data_setup.sql
+# Cài đặt websockets cho Python
+pip install websockets requests
+
+# Hoặc nếu dùng pip3
+pip3 install websockets requests
 ```
 
-### 2. Import Postman Collection
-1. Mở Postman
-2. Import file: `Chat_API_Tests.postman_collection.json`
-3. Collection sẽ có sẵn các test cases
+## Các cách test
 
-### 3. Test APIs
-Chạy các test theo thứ tự:
-1. **Get Chat History** - Lấy tin nhắn trong phòng chat
-2. **Get User Chat Rooms** - Lấy danh sách phòng chat
-3. **Send Message** - Gửi tin nhắn mới
-4. **Test Message Types** - Test các loại tin nhắn khác
+### 1. Test HTTP Endpoints (Đơn giản nhất)
 
-## API Endpoints
+```bash
+# Chạy script bash
+bash test_chat_curl.sh
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/chat/rooms/{roomId}/messages` | Lấy lịch sử tin nhắn |
-| GET | `/chat/users/{userId}/rooms` | Lấy danh sách phòng chat |
-| POST | `/chat/send-message` | Gửi tin nhắn (REST) |
-| WS | `/app/chat.sendMessage` | Gửi tin nhắn (WebSocket) |
+# Hoặc test từng lệnh riêng lẻ
+curl -X POST "http://localhost:8080/chat/sendMessage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Test message",
+    "senderName": "Alice",
+    "senderId": 1,
+    "recipientId": 2,
+    "messageType": "TEXT"
+  }'
+```
 
-## Message Types
-- `TEXT` - Tin nhắn văn bản
-- `IMAGE` - Tin nhắn hình ảnh  
-- `AUDIO` - Tin nhắn âm thanh
-- `VIDEO` - Tin nhắn video
-- `FILE` - Tin nhắn file
-- `LOCATION` - Tin nhắn vị trí
-- `OTHER` - Loại khác
+### 2. Test WebSocket (Realtime)
 
-## Files Included
-- `Chat_API_Tests.postman_collection.json` - Postman collection
-- `test_data_setup.sql` - SQL script tạo dữ liệu test
-- `CHAT_API_TESTING_GUIDE.md` - Hướng dẫn chi tiết
-- `README_CHAT_TESTING.md` - Hướng dẫn nhanh (file này)
+```bash
+# Test WebSocket đơn giản
+python test_websocket_simple.py
+
+# Test WebSocket với nhiều client
+python test_websocket_chat.py
+```
+
+### 3. Test bằng wscat (nếu có)
+
+```bash
+# Cài đặt wscat
+npm install -g wscat
+
+# Kết nối WebSocket
+wscat -c ws://localhost:8080/ws
+
+# Subscribe vào topic
+{"destination": "/topic/rooms/general", "id": "sub-1"}
+
+# Gửi tin nhắn
+{"destination": "/app/chat.sendMessage", "content": "{\"content\":\"Test\",\"senderName\":\"User\",\"senderId\":1,\"recipientId\":2,\"messageType\":\"TEXT\"}"}
+```
+
+## Cấu trúc WebSocket
+
+### Endpoints
+- **WebSocket**: `ws://localhost:8080/ws`
+- **HTTP**: `http://localhost:8080/chat/sendMessage`
+
+### Topics
+- **Public**: `/topic/rooms/{roomId}`
+- **Private**: `/user/{userId}/queue/messages`
+- **Errors**: `/user/{userId}/queue/errors`
+- **Notifications**: `/user/{userId}/queue/notifications`
+
+### Message Format
+
+#### Gửi tin nhắn qua WebSocket:
+```json
+{
+  "destination": "/app/chat.sendMessage",
+  "content": {
+    "content": "Nội dung tin nhắn",
+    "senderName": "Tên người gửi",
+    "senderId": 1,
+    "recipientId": 2,
+    "messageType": "TEXT"
+  }
+}
+```
+
+#### Gửi tin nhắn qua HTTP:
+```json
+{
+  "content": "Nội dung tin nhắn",
+  "senderName": "Tên người gửi",
+  "senderId": 1,
+  "recipientId": 2,
+  "messageType": "TEXT"
+}
+```
+
+## Kiểm tra kết quả
+
+### Thành công:
+- ✅ Kết nối WebSocket thành công
+- ✅ Gửi tin nhắn không bị lỗi
+- ✅ Nhận được tin nhắn từ server
+- ✅ HTTP endpoints trả về status 200
+
+### Lỗi thường gặp:
+- ❌ "Connection refused": Server chưa chạy
+- ❌ "404 Not Found": Endpoint không đúng
+- ❌ "400 Bad Request": Payload không đúng format
+- ❌ "401 Unauthorized": Chưa authenticate
+
+## Debug
+
+### Kiểm tra server logs:
+```bash
+# Xem logs của Spring Boot
+tail -f logs/application.log
+```
+
+### Test database:
+```sql
+-- Kiểm tra tin nhắn đã được lưu
+SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;
+
+-- Kiểm tra phòng chat
+SELECT * FROM chat_rooms;
+```
+
+## Lưu ý
+
+1. **User IDs**: Đảm bảo các user ID (1, 2, 3) đã tồn tại trong database
+2. **CORS**: WebSocket đã được cấu hình cho phép tất cả origins
+3. **Security**: Hiện tại tất cả endpoints đều `permitAll()` để test dễ dàng
+4. **Database**: Cần có dữ liệu users trong database để test
 
 ## Troubleshooting
-- Đảm bảo server Spring Boot đang chạy trên port 8080
+
+### Server không start:
+- Kiểm tra port 8080 có bị chiếm không
 - Kiểm tra database connection
-- Xem logs nếu có lỗi
-- Đảm bảo đã chạy SQL script trước khi test 
+- Xem logs lỗi trong console
+
+### WebSocket không kết nối:
+- Kiểm tra endpoint `/ws` có đúng không
+- Kiểm tra CORS configuration
+- Thử test với wscat trước
+
+### Tin nhắn không được gửi:
+- Kiểm tra format JSON
+- Kiểm tra senderId và recipientId có tồn tại
+- Xem logs server để debug 

@@ -42,17 +42,17 @@ public class SecurityConfiguration {
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(
-                                "/storage/**",
-                                "/api/v1/auth/login",
-                                "/companys/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/ws/**",
-                                "/api/v1/auth/refresh")
-                        .permitAll()
-                        .anyRequest().authenticated())
+                        // .requestMatchers(
+                        // "/storage/**",
+                        // "/api/v1/auth/login",
+                        // "/companys/**",
+                        // "/v3/api-docs/**",
+                        // "/swagger-ui/**",
+                        // "/swagger-ui.html",
+                        // "/ws/**",
+                        // "/api/v1/auth/refresh")
+                        // .permitAll()
+                        .anyRequest().permitAll())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

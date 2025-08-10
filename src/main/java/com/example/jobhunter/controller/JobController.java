@@ -1,12 +1,12 @@
 package com.example.jobhunter.controller;
 
 import com.example.jobhunter.domain.Job;
+import com.example.jobhunter.domain.SkillRepository;
 import com.example.jobhunter.domain.Skills;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
 import com.example.jobhunter.dto.response.job.ResCreateJobDTO;
 import com.example.jobhunter.dto.response.job.ResUpdateJobDTO;
 import com.example.jobhunter.repository.JobRepository;
-import com.example.jobhunter.repository.SkillRepository;
 import com.example.jobhunter.service.JobService;
 import com.example.jobhunter.util.error.IdInvalidException;
 
