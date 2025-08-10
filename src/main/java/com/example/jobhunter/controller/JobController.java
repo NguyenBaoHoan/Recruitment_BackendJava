@@ -3,6 +3,7 @@ package com.example.jobhunter.controller;
 import com.example.jobhunter.domain.Job;
 import com.example.jobhunter.domain.SkillRepository;
 import com.example.jobhunter.domain.Skills;
+import com.example.jobhunter.dto.request.ReqCreateJobDTO;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
 import com.example.jobhunter.dto.response.job.ResCreateJobDTO;
 import com.example.jobhunter.dto.response.job.ResUpdateJobDTO;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/v1/jobs")
-
 public class JobController {
     private final JobService jobService;
     private final JobRepository jobRepository;
@@ -50,6 +50,20 @@ public class JobController {
     @PostMapping
     public ResponseEntity<ResCreateJobDTO> createJob(@RequestBody Job job) {
         return ResponseEntity.status(HttpStatus.CREATED).body(jobService.handleSaveJob(job));
+    }
+
+    /**
+     * Đăng ký job mới với thông tin chi tiết
+     * POST /api/v1/jobs/register
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> registerJob(@RequestBody ReqCreateJobDTO request) {
+        try {
+            ResCreateJobDTO result = jobService.registerNewJob(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
