@@ -59,7 +59,8 @@ public class SecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/ws/**",
-                                "/api/v1/auth/refresh")
+                                "/error",
+                                "/")
                         .permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))

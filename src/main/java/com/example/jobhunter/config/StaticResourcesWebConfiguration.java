@@ -13,7 +13,8 @@ public class StaticResourcesWebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/storage/**")
-                .addResourceLocations(baseURI);
+        // Đảm bảo property kết thúc bằng /
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations(baseURI); // ví dụ: file:C:/Users/ADMIN/uploads/
     }
 }
