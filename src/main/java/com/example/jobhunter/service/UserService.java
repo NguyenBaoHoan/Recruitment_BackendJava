@@ -3,6 +3,7 @@ package com.example.jobhunter.service;
 
 import com.example.jobhunter.domain.Company;
 import com.example.jobhunter.domain.User;
+import com.example.jobhunter.dto.request.ReqNotificationSettingsDTO;
 import com.example.jobhunter.dto.response.ResCreateUserDTO;
 import com.example.jobhunter.dto.response.ResUserDTO;
 import com.example.jobhunter.dto.response.ResultPaginationDTO;
@@ -209,26 +210,28 @@ public class UserService {
    * @throws IdInvalidException if the user is not found or the old password is incorrect.
    */
 
-    public void handleChangePassword(
-        String email,
-        String oldPassword,
-        String newPassword
-    ) throws IdInvalidException {
-        User currentUser = this.userRepository.findByEmail(email);
-        if (currentUser == null) {
-        throw new IdInvalidException("User not found");
+    public void handleChangePassword(Long userId, String oldPassword, String newPassword) throws IdInvalidException {
+        User currentUser = this.userRepository.findById(userId)
+            .orElseThrow(() -> new IdInvalidException("Không tìm thấy người dùng với ID: " + userId));
+        
+        // Kiểm tra mật khẩu cũ có khớp không
+        if (currentUser.getPassWord() == null || 
+            !passwordEncoder.matches(oldPassword, currentUser.getPassWord())) {
+            throw new IdInvalidException("Mật khẩu cũ không chính xác.");
         }
 
-        // Check if the old password matches
-        if (
-        currentUser.getPassWord() == null ||
-        !this.passwordEncoder.matches(oldPassword, currentUser.getPassWord())
-        ) {
-        throw new IdInvalidException("Mật khẩu cũ không chính xác.");
-        }
-
-        // Update with the new, encoded password
+        // Cập nhật mật khẩu mới đã được mã hóa
         currentUser.setPassWord(this.passwordEncoder.encode(newPassword));
         this.userRepository.save(currentUser);
     }
+
+    public void updateNotificationSettings(String email, ReqNotificationSettingsDTO dto) {
+    User currentUser = this.userRepository.findByEmail(email);
+    if (currentUser != null) {
+        currentUser.setNotifyNewMessages(dto.isNotifyNewMessages());
+        currentUser.setNotifyProfileUpdates(dto.isNotifyProfileUpdates());
+        currentUser.setNotifyJobSuggestions(dto.isNotifyJobSuggestions());
+        this.userRepository.save(currentUser);
+    }
+}
 }

@@ -27,7 +27,6 @@ import com.example.jobhunter.dto.request.*;
 import com.example.jobhunter.service.UserService;
 import com.example.jobhunter.util.anotation.ApiMessage;
 import com.example.jobhunter.util.error.IdInvalidException;
-import com.example.jobhunter.dto.request.ReqChangePasswordDTO;
 import com.example.jobhunter.util.error.SecurityUtil;
 
 import org.springframework.web.bind.annotation.RequestParam;
@@ -92,13 +91,20 @@ public class UserController {
     @PostMapping("/change-password")
     @ApiMessage("Đổi mật khẩu thành công")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ReqChangePasswordDTO req) throws IdInvalidException {
-        // Lấy email của người dùng đang đăng nhập từ token bảo mật
-        String email = SecurityUtil.getCurrentUserLogin()
-            .orElseThrow(() -> new IdInvalidException("Token không hợp lệ, không tìm thấy email người dùng."));
-        
-        // Gọi service để xử lý logic đổi mật khẩu
-        this.userService.handleChangePassword(email, req.getOldPassword(), req.getNewPassword());
+        // Lấy userId trực tiếp từ request body
+        this.userService.handleChangePassword(req.getUserId(), req.getOldPassword(), req.getNewPassword());
         
         return ResponseEntity.ok("Đổi mật khẩu thành công!");
+    }
+    @PutMapping("/notifications")
+    @ApiMessage("Cập nhật cài đặt thông báo thành công")
+    public ResponseEntity<Void> updateNotificationSettings(@RequestBody ReqNotificationSettingsDTO dto) throws IdInvalidException {
+        String email = SecurityUtil.getCurrentUserLogin()
+            .orElseThrow(() -> new IdInvalidException("Token không hợp lệ"));
+        
+        // Thêm phương thức mới vào UserService để xử lý logic này
+        userService.updateNotificationSettings(email, dto);
+        
+        return ResponseEntity.ok().build();
     }
 }
