@@ -1,51 +1,48 @@
 # 💼 JobHunter — Recruitment Platform Backend
 
-JobHunter is a **backend recruitment management system** designed to connect candidates with companies, 
-featuring real-time communication, secure authentication, and modular service design.  
-Built with **Spring Boot 3, PostgreSQL, Redis, and WebSocket**, this project demonstrates scalable, 
-secure, and production-ready backend engineering.
+JobHunter is a **backend recruitment management system** built with Spring Boot,  
+providing secure authentication, job management, and real-time communication for recruiters and candidates.
 
 ---
 
 ## 🚀 Tech Stack
 - **Java 21** + **Spring Boot 3**
-- **Spring Security (JWT Authentication, Role-based Authorization)**
-- **Spring Data JPA + PostgreSQL**
-- **Redis** (caching, session & room management)
-- **WebSocket (STOMP protocol, SockJS)** for real-time chat & event broadcasting
-- **Gradle Kotlin DSL** for project build
+- **Spring Security (JWT Authentication)**
+- **Spring Data JPA + MySQL**
+- **Spring WebSocket (STOMP protocol, SockJS)**
+- **Gradle Kotlin DSL**
 
 ---
 
 ## ✨ Key Features
 - 🔑 **Authentication & Security**  
-  Secure login/register with JWT, refresh tokens, and role-based access control.
-  
+  JWT-based authentication with role-based access control.
+
 - 👤 **User & Profile Management**  
-  Manage candidates, recruiters, portfolios, and resumes with file upload support.
+  Candidate profiles, portfolios, skills, and file upload (resume, portfolio images).
 
 - 💼 **Job Management**  
-  CRUD operations for job postings, skill tagging, and career expectations.
+  CRUD operations for job postings with skill & career expectation tagging.
 
 - ⭐ **Favorite Jobs**  
-  Users can save and track favorite jobs with Redis caching to reduce DB load by up to **60%**.
+  Save and track job opportunities for quick access.
 
-- 💬 **Real-time Chat & Collaboration**  
-  Chat rooms, instant messaging, and participant tracking powered by **Spring WebSocket + STOMP**.
-
-- 📊 **Scalable API Design**  
-  Clean separation of Controller–Service–Repository layers with DTO mapping for request/response.  
-  Includes global exception handling and consistent REST response formatting.
-
----
-
-## 🏗️ Architecture Overview
-- **Controller Layer** → Exposes REST APIs (Auth, User, Job, Skill, Portfolio, Favorite Jobs, Chat).  
-- **Service Layer** → Encapsulates business logic with modular, testable design.  
-- **Repository Layer** → Database persistence via Spring Data JPA & Redis.  
-- **Domain & DTOs** → Structured data models for entities, request/response payloads.  
-- **Config & Security** → Global configurations (CORS, Swagger, JWT, WebSocket, Exception Handling).  
+- 💬 **Real-time Chat**  
+  Chat rooms, instant messaging, and participant tracking using WebSocket.
 
 ---
 
 ## 📂 Project Structure
+src/main/java/com/example/jobhunter/
+├─ config/ # Security, WebSocket, CORS, OpenAPI
+├─ controller/ # REST endpoints (Auth, User, Job, Chat, etc.)
+├─ domain/ # Entities (User, Job, Message, Portfolio…)
+├─ dto/ # Request/Response DTOs
+├─ repository/ # Spring Data JPA repositories
+├─ service/ # Business logic services
+└─ JobhunterApplication.java
+
+---
+
+## Access API Docs
+👉 http://localhost:8080/swagger-ui.html
