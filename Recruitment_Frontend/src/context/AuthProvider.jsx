@@ -1,0 +1,110 @@
+import { useState, useEffect } from 'react';
+import { AuthContext } from './AuthContext';
+import { authService } from '../services/authService';
+import { clearAccessToken, getAccessToken } from '../services/apiService';
+
+export default function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    // ✅ Kiểm tra xem có access token trong memory không
+    const hasAccessToken = getAccessToken();
+    
+    if (!hasAccessToken) {
+      console.log('No access token in memory - not authenticated');
+      setUser(null);
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // ✅ Thử getCurrentUser với access token hiện tại
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      // ✅ Nếu 401, thử refresh token (có thể có refresh_token cookie)
+      if (error.message?.includes('401') || error.response?.status === 401) {
+        try {
+          await authService.refreshToken();
+          const userData = await authService.getCurrentUser();
+          setUser(userData);
+          setIsAuthenticated(true);
+        } catch {
+          console.log('No active session - no valid refresh token');
+          setUser(null);
+          setIsAuthenticated(false);
+          clearAccessToken();
+        }
+      } else {
+        console.log('Error getting user info:', error);
+        setUser(null);
+        setIsAuthenticated(false);
+        clearAccessToken();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Login function
+   */
+  const login = async (username, password) => {
+    const data = await authService.login(username, password);
+    
+    // Set user từ response
+    if (data.user) {
+      setUser(data.user);
+      setIsAuthenticated(true);
+    }
+    
+    return data;
+  };
+
+  /**
+   * Logout function
+   */
+  const logout = async () => {
+    try {
+      await authService.logout();
+      setUser(null);
+      setIsAuthenticated(false);
+      clearAccessToken();
+    } catch (error) {
+      console.error('Logout error:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+      clearAccessToken();
+    }
+  };
+
+  /**
+   * Update user info
+   */
+  const updateUser = (userData) => {
+    setUser(userData);
+  };
+
+  const value = {
+    user,
+    isAuthenticated,
+    loading,
+    login,
+    logout,
+    updateUser
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+}
