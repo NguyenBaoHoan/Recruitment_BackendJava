@@ -8,7 +8,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
-// import DashboardPage from './pages/DashboardPage'
+import DashboardPage from './pages/DashboardPage'
 
 
 const router = createBrowserRouter([
@@ -20,18 +20,14 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />
   },
-  // {
-  //   path: "/dashboard",
-  //   element: (
-  //     <ProtectedRoute>
-  //       <DashboardPage />
-  //     </ProtectedRoute>
-  //   )
-  // },
-  // {
-  //   path: "/home",
-  //   element: <HomePage />
-  // }
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <DashboardPage />
+      </ProtectedRoute>
+    )
+  }
 ])
 
 createRoot(document.getElementById('root')).render(

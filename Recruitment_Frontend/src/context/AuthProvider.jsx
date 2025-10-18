@@ -17,10 +17,22 @@ export default function AuthProvider({ children }) {
     const hasAccessToken = getAccessToken();
     
     if (!hasAccessToken) {
-      console.log('No access token in memory - not authenticated');
-      setUser(null);
-      setIsAuthenticated(false);
-      setLoading(false);
+      console.log('No access token in memory - trying refresh token from cookie');
+      // ✅ Không có access token, thử refresh từ cookie
+      try {
+        await authService.refreshToken();
+        const userData = await authService.getCurrentUser();
+        setUser(userData);
+        setIsAuthenticated(true);
+        console.log('✅ Successfully refreshed token from cookie');
+      } catch {
+        console.log('No active session - no valid refresh token in cookie');
+        setUser(null);
+        setIsAuthenticated(false);
+        clearAccessToken();
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
