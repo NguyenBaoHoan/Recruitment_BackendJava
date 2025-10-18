@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
 import './styles/index.css'
 import  AuthProvider  from './context/AuthProvider'
-import { NotificationProvider } from './context/NotificationContext'
+import NotificationProvider from './context/NotificationProvider'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { authService } from '../services/authService';
 import { clearAccessToken, getAccessToken } from '../services/apiService';
-import { useNotification } from './NotificationContext';
+import { useNotification } from '../hooks/useNotification';
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
