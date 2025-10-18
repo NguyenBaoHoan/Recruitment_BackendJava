@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { authService } from '../services/authService';
 import { clearAccessToken, getAccessToken } from '../services/apiService';
+import { useNotification } from './NotificationContext';
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { showSuccess } = useNotification();
 
   useEffect(() => {
     checkAuth();
@@ -72,10 +74,19 @@ export default function AuthProvider({ children }) {
   const login = async (username, password) => {
     const data = await authService.login(username, password);
     
-    // Set user từ response
-    if (data.user) {
-      setUser(data.user);
+    // Lấy thông tin user sau khi login thành công
+    try {
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
       setIsAuthenticated(true);
+      
+      // Hiển thị thông báo đăng nhập thành công
+      showSuccess(`Welcome back, ${userData.name || userData.email || 'User'}! Login successful.`);
+    } catch {   
+      // Nếu không lấy được user info, vẫn set authenticated = true
+      setUser(data.user || { email: username });
+      setIsAuthenticated(true);
+      showSuccess(`Welcome back! Login successful.`);
     }
     
     return data;
