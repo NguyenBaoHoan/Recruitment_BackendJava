@@ -5,8 +5,9 @@ import './styles/index.css'
 import  AuthProvider  from './context/AuthProvider'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
+
 import LoginPage from './pages/LoginPage'
-// import RegisterPage from './pages/RegisterPage'
+import RegisterPage from './pages/RegisterPage'
 // import DashboardPage from './pages/DashboardPage'
 
 
@@ -15,10 +16,10 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />
   },
-  // {
-  //   path: "/register",
-  //   element: <RegisterPage />
-  // },
+  {
+    path: "/register",
+    element: <RegisterPage />
+  },
   // {
   //   path: "/dashboard",
   //   element: (
