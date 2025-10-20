@@ -106,10 +106,10 @@ const Sidebar = ({ isCollapsed, isMobileOpen, onToggle, onClose, user }) => {
           `}>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">JH</span>
+                <span className="text-white font-bold text-sm">R</span>
               </div>
               <h2 className="text-xl font-bold text-gray-800 whitespace-nowrap">
-                JobHunter
+                Recruitment
               </h2>
             </div>
           </div>
