@@ -128,7 +128,7 @@ public class UserService {
         if (currentUser != null) {
             currentUser.setName(reqUser.getName());
             currentUser.setEmail(reqUser.getEmail());
-            currentUser.setPassWord(reqUser.getPassWord());
+            currentUser.setPassword(reqUser.getPassword());
             // check company
             if (reqUser.getCompany() != null) {
                 Optional<Company> CompanyOptional = companyRepository.findById(reqUser.getCompany().getId());
@@ -215,13 +215,13 @@ public class UserService {
             .orElseThrow(() -> new IdInvalidException("Không tìm thấy người dùng với ID: " + userId));
         
         // Kiểm tra mật khẩu cũ có khớp không
-        if (currentUser.getPassWord() == null || 
-            !passwordEncoder.matches(oldPassword, currentUser.getPassWord())) {
+        if (currentUser.getPassword() == null || 
+            !passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
             throw new IdInvalidException("Mật khẩu cũ không chính xác.");
         }
 
         // Cập nhật mật khẩu mới đã được mã hóa
-        currentUser.setPassWord(this.passwordEncoder.encode(newPassword));
+        currentUser.setPassword(this.passwordEncoder.encode(newPassword));
         this.userRepository.save(currentUser);
     }
 

@@ -40,7 +40,7 @@ public class AuthService {
         User newUser = new User();
         newUser.setName(reqRegisterDTO.getName());
         newUser.setEmail(reqRegisterDTO.getEmail());
-        newUser.setPassWord(hashedPassword);
+        newUser.setPassword(hashedPassword);
         
         return this.userService.handleSaveUser(newUser);
     }

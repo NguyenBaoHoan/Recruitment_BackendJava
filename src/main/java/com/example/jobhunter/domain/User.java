@@ -47,7 +47,7 @@ public class User {
     private String email;
     
     @NotBlank(message = "you cann't leave blank")
-    private String passWord;
+    private String password;
     
     private int age;
     
@@ -72,6 +72,21 @@ public class User {
     private String photoUrl;
     private String userType; // candidate, recruiter, admin
     
+    // Oauth2
+    /**
+     * OAuth provider name(google, github, facebook)
+     * Null nếu user đăng ký bằng email/password
+     */
+    private String oauthProvider;
+
+    /**
+    * User ID từ OAuth provider
+    * Google: sub
+    * GitHub: id
+    * Facebook: id
+    */
+    private String oauthProviderId;
+
     // Các trường boolean để lưu cài đặt thông báo.
     @Column(name = "notify_new_messages", columnDefinition = "boolean default true")
     private boolean notifyNewMessages = true;
