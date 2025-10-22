@@ -19,6 +19,7 @@ import com.example.jobhunter.dto.response.ResultPaginationDTO;
 import com.example.jobhunter.dto.response.job.ResCreateJobDTO;
 import com.example.jobhunter.dto.response.job.ResUpdateJobDTO;
 import com.example.jobhunter.repository.JobRepository;
+import com.example.jobhunter.util.constant.StatusEnum;
 import com.example.jobhunter.util.error.IdInvalidException;
 
 @Service
@@ -58,6 +59,7 @@ public class JobService {
         job.setStartDate(request.getStartDate());
         job.setEndDate(request.getEndDate());
         job.setActive(true);
+        job.setStatus(StatusEnum.ACTIVE); // Set status mặc định là ACTIVE
         job.setJobStatus(request.getJobStatus());
 
         // Xử lý skills
@@ -131,6 +133,13 @@ public class JobService {
         curJob.setStartDate(job.getStartDate());
         curJob.setEndDate(job.getEndDate());
         curJob.setActive(job.isActive());
+        
+        // Cập nhật status dựa trên isActive
+        if (job.isActive()) {
+            curJob.setStatus(StatusEnum.ACTIVE);
+        } else {
+            curJob.setStatus(StatusEnum.INACTIVE);
+        }
 
         // Handle skills similar to create
         if (job.getSkills() != null) {

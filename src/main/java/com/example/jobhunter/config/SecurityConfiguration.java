@@ -70,9 +70,17 @@ public class SecurityConfiguration {
                                 "/swagger-ui.html",
                                 "/ws/**",
                                 "/error",
+                                "/api/v1/auth/oauth2/**", // Thêm OAuth2 endpoints
+                                "/oauth2/**", // Thêm Spring OAuth2 endpoints
+                                "/login/oauth2/**", // Thêm OAuth2 login endpoints
                                 "/")
                         .permitAll()
                         .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                    // Cấu hình OAuth2 login
+                    .loginPage("/api/v1/auth/oauth2/authorize/{provider}")
+                    .defaultSuccessUrl("/api/v1/auth/oauth2/callback/{provider}", true)
+            )
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -11,7 +11,10 @@ import com.example.jobhunter.dto.request.OAuth2UserInfo;
 import com.example.jobhunter.repository.UserRepository;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service; // ✅ 1. Thêm import
+import org.springframework.transaction.annotation.Transactional; // ✅ 2. Thêm import
 
 /**
  * Service xử lý OAuth2 authentication
@@ -25,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Data
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class OAuth2Service {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,93 +41,50 @@ public class OAuth2Service {
      * @param attributes User attributes từ provider
      * @return Chuẩn hóa OAuth2UserInfo
      */
-    public OAuth2UserInfo parseOAuth2UserInfo(String provdier, Map<String, Object> attributes) {
-        return switch (provdier.toLowerCase()) {
-            case "google" -> parseGoogleUser(attributes);
-            case "github" -> parseGitHubUser(attributes);
-            case "facebook" -> parseFacebookUser(attributes);
-            default -> throw new IllegalArgumentException("Unsupported OAuth2 provider: " + provdier);
+    public OAuth2UserInfo parseOAuth2User(String provider, Map<String, Object> attributes) {
+        String normalized = provider == null ? "" : provider.toLowerCase();
+        return switch (normalized) {
+            case "google" -> OAuth2UserInfo.builder()
+                    .provider("google")
+                    .providerId((String) attributes.get("sub"))
+                    .email((String) attributes.get("email"))
+                    .name((String) attributes.getOrDefault("name", attributes.get("given_name")))
+                    .avatarUrl((String) attributes.get("picture"))
+                    .emailVerified((Boolean) attributes.getOrDefault("email_verified", Boolean.TRUE))
+                    .build();
+            case "github" -> {
+                Object idObj = attributes.get("id");
+                yield OAuth2UserInfo.builder()
+                        .provider("github")
+                        .providerId(idObj != null ? idObj.toString() : null)
+                        .email((String) attributes.get("email"))
+                        .name((String) attributes.getOrDefault("name", attributes.get("login")))
+                        .avatarUrl((String) attributes.get("avatar_url"))
+                        .emailVerified(Boolean.TRUE)
+                        .build();
+            }
+            case "facebook" -> {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> picture = (Map<String, Object>) attributes.get("picture");
+                String avatarUrl = null;
+                if (picture != null) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> data = (Map<String, Object>) picture.get("data");
+                    if (data != null) {
+                        avatarUrl = (String) data.get("url");
+                    }
+                }
+                yield OAuth2UserInfo.builder()
+                        .provider("facebook")
+                        .providerId((String) attributes.get("id"))
+                        .email((String) attributes.get("email"))
+                        .name((String) attributes.get("name"))
+                        .avatarUrl(avatarUrl)
+                        .emailVerified(Boolean.TRUE)
+                        .build();
+            }
+            default -> throw new IllegalArgumentException("Unsupported OAuth2 provider: " + provider);
         };
-    }
-
-    /**
-     * Parse Google user attributes
-     * 
-     * Google trả về:
-     * {
-     * "sub": "1234567890",
-     * "name": "John Doe",
-     * "email": "john@gmail.com",
-     * "picture": "https://...",
-     * "email_verified": true
-     * }
-     */
-    private OAuth2UserInfo parseGoogleUser(Map<String, Object> attributes) {
-        return OAuth2UserInfo.builder()
-                .providerId((String) attributes.get("sub"))
-                .provider("google")
-                .email((String) attributes.get("email"))
-                .name((String) attributes.get("name"))
-                .avatarUrl((String) attributes.get("picture"))
-                .emailVerified((Boolean) attributes.get("email_verified"))
-                .build();
-    }
-
-    /**
-     * Parse GitHub user attributes
-     * 
-     * GitHub trả về:
-     * {
-     * "id": 12345,
-     * "login": "johndoe",
-     * "email": "john@github.com",
-     * "avatar_url": "https://...",
-     * "name": "John Doe"
-     * }
-     */
-    private OAuth2UserInfo parseGitHubUser(Map<String, Object> attributes) {
-        return OAuth2UserInfo.builder()
-                .providerId(String.valueOf(attributes.get("id")))
-                .provider("github")
-                .email((String) attributes.get("email"))
-                .name((String) attributes.get("name"))
-                .avatarUrl((String) attributes.get("avatar_url"))
-                .emailVerified(true) // GitHub emails are verified
-                .build();
-    }
-
-    /**
-     * Parse Facebook user attributes
-     * 
-     * Facebook trả về:
-     * {
-     * "id": "1234567890",
-     * "name": "John Doe",
-     * "email": "john@facebook.com",
-     * "picture": {
-     * "data": {
-     * "url": "https://..."
-     * }
-     * }
-     * }
-     */
-    @SuppressWarnings("unchecked")
-    private OAuth2UserInfo parseFacebookUser(Map<String, Object> attributes) {
-        String avatarUrl = null;
-        if (attributes.get("picture") != null) {
-            Map<String, Object> picture = (Map<String, Object>) attributes.get("picture");
-            Map<String, Object> data = (Map<String, Object>) picture.get("data");
-            avatarUrl = (String) data.get("url");
-        }
-
-        return OAuth2UserInfo.builder()
-                .providerId((String) attributes.get("id"))
-                .provider("facebook")
-                .email((String) attributes.get("email"))
-                .name((String) attributes.get("name"))
-                .avatarUrl(avatarUrl)
-                .emailVerified(true)
-                .build();
     }
 
     /**
@@ -137,6 +99,7 @@ public class OAuth2Service {
      * @param oauth2User User info từ OAuth2 provider
      * @return User entity
      */
+    @Transactional
     public User processOAuth2Login(OAuth2UserInfo oauth2User) {
         log.info("Processing OAuth2 login for email: {}, provider: {}",
                 oauth2User.getEmail(), oauth2User.getProvider());

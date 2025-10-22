@@ -50,7 +50,7 @@ public class User {
     private String password;
     
     private int age;
-    
+    private String role;
     @Enumerated(EnumType.STRING)
     private GenderEnum gender;
     
