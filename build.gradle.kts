@@ -57,6 +57,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
+
+    // ✅ THÊM: Oauth2 client dependencies
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 }
 
 // ✅ SỬA: Test configuration
