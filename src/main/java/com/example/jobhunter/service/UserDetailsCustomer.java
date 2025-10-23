@@ -24,7 +24,7 @@ public class UserDetailsCustomer implements UserDetailsService {
         com.example.jobhunter.domain.User user = this.userService.handleGetUserByEmail(username);
         if(user == null)
             throw new UsernameNotFoundException("Invalid Username/Password");
-        return new User(user.getEmail(), user.getPassword(),
+        return new User(user.getEmail(), user.getPassWord(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
     }

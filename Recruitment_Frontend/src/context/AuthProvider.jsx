@@ -116,13 +116,29 @@ export default function AuthProvider({ children }) {
     setUser(userData);
   };
 
+
+  const handleOAuth2Auth = async () => {
+    try {
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+      setIsAuthenticated(true);
+      console.log('✅ OAuth2 authentication successful');
+    } catch (error) {
+      console.log('OAuth2 authentication failed:', error.message);
+      setUser(null);
+      setIsAuthenticated(false);
+      clearAccessToken();
+    }
+  };
+
   const value = {
     user,
     isAuthenticated,
     loading,
     login,
     logout,
-    updateUser
+    updateUser,
+    handleOAuth2Auth // ✅ Thêm method này
   };
 
   return (

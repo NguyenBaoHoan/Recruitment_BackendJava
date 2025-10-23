@@ -41,7 +41,7 @@ public class AuthService {
         User newUser = new User();
         newUser.setName(reqRegisterDTO.getName());
         newUser.setEmail(reqRegisterDTO.getEmail());
-        newUser.setPassword(hashedPassword);
+        newUser.setPassWord(hashedPassword);
         return this.userService.handleSaveUser(newUser);
     }
 
@@ -66,7 +66,7 @@ public class AuthService {
         User newUser = new User();
         newUser.setName(name);
         newUser.setEmail(email);
-        newUser.setPassword(hashedPassword);
+        newUser.setPassWord(hashedPassword);
         // Bạn có thể thêm một trường `provider` (V.d: GOOGLE) cho User nếu muốn
         
         return this.userService.handleSaveUser(newUser);

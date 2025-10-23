@@ -45,8 +45,8 @@ public class User {
 
     @NotBlank(message = "you cann't leave blank")
     private String email;
-
-    private String password;
+    @NotBlank(message = "you cann't leave blank")
+    private String passWord;
 
     private int age;
     private String role;
@@ -71,21 +71,6 @@ public class User {
     private String photoUrl;
     private String userType; // candidate, recruiter, admin
 
-    // Oauth2
-    /**
-     * OAuth provider name(google, github, facebook)
-     * Null nếu user đăng ký bằng email/password
-     */
-    private String oauthProvider;
-
-    /**
-     * User ID từ OAuth provider
-     * Google: sub
-     * GitHub: id
-     * Facebook: id
-     */
-    private String oauthProviderId;
-
     // Các trường boolean để lưu cài đặt thông báo.
     @Column(name = "notify_new_messages", columnDefinition = "boolean default true")
     private boolean notifyNewMessages = true;
@@ -101,7 +86,7 @@ public class User {
     private Company company;
 
     @ManyToMany(mappedBy = "participants")
-    @JsonIgnoreProperties(value = { "participants" })
+    @JsonIgnoreProperties(value = {"participants"})
     private List<ChatRoom> chatRooms = new ArrayList<>();
 
     // ✅ THÊM: Trạng thái tìm việc
@@ -112,7 +97,7 @@ public class User {
 
     // ✅ THÊM: Quan hệ với CareerExpectation
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties(value = { "user" })
+    @JsonIgnoreProperties(value = {"user"})
     @Builder.Default
     private List<CareerExpectation> careerExpectations = new ArrayList<>();
 

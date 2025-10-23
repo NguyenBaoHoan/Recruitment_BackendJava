@@ -1,23 +1,41 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import LoginForm from '../components/auth/LoginForm';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated, loading: authLoading } = useAuth(); // ✅ loading từ context
+  const location = useLocation();
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   // ✅ Redirect if already authenticated
   useEffect(() => {
-    console.log('🔍 Auth State:', { isAuthenticated, authLoading });
+    const params = new URLSearchParams(location.search);
+    const oauthStatus = params.get('oauth');
+    const oauthError = params.get('error');
+    const userEmail = params.get('email');
+    const userName = params.get('name');
+
+    if (oauthStatus === 'success') {
+      console.log('✅ OAuth2 success:', { userName, userEmail });
+      setError('');
+      window.history.replaceState({}, document.title, location.pathname);
+    }
+
+    if (oauthError) {
+      const decodedError = decodeURIComponent(oauthError);
+      console.error('❌ OAuth2 error:', decodedError);
+      setError(decodedError || 'Authentication failed. Please try again.');
+      window.history.replaceState({}, document.title, location.pathname);
+    }
 
     if (isAuthenticated && !authLoading) {
       console.log('✅ Redirecting to dashboard...');
       navigate('/dashboard');
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [location, isAuthenticated, authLoading, navigate]);
 
   const handleLogin = async (formData) => {
     setLoading(true);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { validators } from '../../utils/validators';
-
+import OAuthButtons from './OAuthButtons'; // ✅ Thêm import
 /**
  * LoginForm - Component form đăng nhập
  * Features:
@@ -176,6 +176,9 @@ const LoginForm = ({ onSubmit, loading, error }) => {
           'Sign In'
         )}
       </button>
+
+      {/* ✅ THÊM: OAuth Buttons */}
+      <OAuthButtons providers={['google', 'github', 'facebook']} />
 
       {/* Register Link */}
       <p className="text-center text-sm text-gray-600">

@@ -1,5 +1,7 @@
 package com.example.jobhunter.config;
 
+import java.nio.charset.StandardCharsets;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -230,6 +232,7 @@ public class SecurityConfiguration {
                     .queryParam("email", user.getEmail())
                     .queryParam("name", user.getName())
                     .queryParam("access_token", accessToken) // Gửi luôn access_token về
+                    .encode(StandardCharsets.UTF_8) // ✅ THÊM DÒNG NÀY fix utf-8 url
                     .build().toUriString();
 
             // Xóa cookie tạm thời dùng cho flow OAuth2
@@ -259,4 +262,3 @@ public class SecurityConfiguration {
         };
     }
 }
-
