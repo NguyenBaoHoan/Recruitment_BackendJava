@@ -42,7 +42,6 @@ public class AuthService {
         newUser.setName(reqRegisterDTO.getName());
         newUser.setEmail(reqRegisterDTO.getEmail());
         newUser.setPassWord(hashedPassword);
-
         return this.userService.handleSaveUser(newUser);
     }
 
