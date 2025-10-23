@@ -42,28 +42,27 @@ public class User {
     private long id;
 
     private String name;
-    
+
     @NotBlank(message = "you cann't leave blank")
     private String email;
-    
-    @NotBlank(message = "you cann't leave blank")
+
     private String password;
-    
+
     private int age;
     private String role;
     @Enumerated(EnumType.STRING)
     private GenderEnum gender;
-    
+
     private String address;
-    
+
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
-    
+
     private Instant createdAt;
     private Instant updateAt;
     private String createdBy;
     private String updatedBy;
-    
+
     @Column(name = "cv_path")
     private String cvPath; // Đường dẫn đến CV của người dùng
 
@@ -71,7 +70,7 @@ public class User {
     private String displayName;
     private String photoUrl;
     private String userType; // candidate, recruiter, admin
-    
+
     // Oauth2
     /**
      * OAuth provider name(google, github, facebook)
@@ -80,11 +79,11 @@ public class User {
     private String oauthProvider;
 
     /**
-    * User ID từ OAuth provider
-    * Google: sub
-    * GitHub: id
-    * Facebook: id
-    */
+     * User ID từ OAuth provider
+     * Google: sub
+     * GitHub: id
+     * Facebook: id
+     */
     private String oauthProviderId;
 
     // Các trường boolean để lưu cài đặt thông báo.
@@ -102,7 +101,7 @@ public class User {
     private Company company;
 
     @ManyToMany(mappedBy = "participants")
-    @JsonIgnoreProperties(value = {"participants"})
+    @JsonIgnoreProperties(value = { "participants" })
     private List<ChatRoom> chatRooms = new ArrayList<>();
 
     // ✅ THÊM: Trạng thái tìm việc
@@ -113,13 +112,13 @@ public class User {
 
     // ✅ THÊM: Quan hệ với CareerExpectation
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties(value = {"user"})
+    @JsonIgnoreProperties(value = { "user" })
     @Builder.Default
     private List<CareerExpectation> careerExpectations = new ArrayList<>();
 
     @PrePersist
     public void handleCreateAt() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() 
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
         this.createdAt = Instant.now();
@@ -127,7 +126,7 @@ public class User {
 
     @PreUpdate
     public void handleUpdateAt() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() 
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
         this.updateAt = Instant.now();
