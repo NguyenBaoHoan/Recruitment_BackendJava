@@ -51,8 +51,8 @@ public class UserController {
             throw new IdInvalidException(
                 "Email" + postManUser.getEmail() + "Email này đã được sử dụng!!!");
         }
-        String hashPassword = this.passwordEncoder.encode(postManUser.getPassWord());
-        postManUser.setPassWord((hashPassword));
+        String hashPassword = this.passwordEncoder.encode(postManUser.getPassword());
+        postManUser.setPassword((hashPassword));
         User newUser = userService.handleSaveUser(postManUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(newUser));
     }

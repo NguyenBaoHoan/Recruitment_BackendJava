@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎯 JobHunter - Recruitment Platform
+# 🎯 Recruitment Platform
 
 ### A Modern, Full-Featured Job Recruitment System
 

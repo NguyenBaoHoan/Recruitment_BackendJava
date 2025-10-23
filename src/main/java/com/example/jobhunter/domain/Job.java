@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.example.jobhunter.util.constant.LevelEnum;
+import com.example.jobhunter.util.constant.StatusEnum;
 import com.example.jobhunter.util.error.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -52,11 +53,13 @@ public class Job {
     private Date startDate;
     private Date endDate;
     private boolean isActive;
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status; // ACTIVE, INACTIVE, PENDING, etc.
     private Instant createdAt;
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
-private String jobStatus;
+    private String jobStatus;
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "jobs", "hibernateLazyInitializer", "handler" })
     @JoinTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))

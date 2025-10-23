@@ -42,7 +42,31 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <Navigate to="/dashboard" replace />
-      }
+      },
+      {
+        path: "jobs",
+        element: (
+          <ProtectedRoute>
+            <AllJobsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "search",
+        element: (
+          <ProtectedRoute>
+            <SearchJobsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "saved-jobs",
+        element: (
+          <ProtectedRoute>
+            <SavedJobsPage />
+          </ProtectedRoute>
+        )
+      },
     ]
   }
 ])
