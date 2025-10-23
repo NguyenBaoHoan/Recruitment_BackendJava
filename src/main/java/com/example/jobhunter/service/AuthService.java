@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.UUID; // ✅ THÊM IMPORT NÀY
 
 @Service
 public class AuthService {
@@ -29,22 +30,50 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
     }
-    
+
     public User register(ReqRegisterDTO reqRegisterDTO) throws IdInvalidException {
         if (this.userService.isEmailExist(reqRegisterDTO.getEmail())) {
             throw new IdInvalidException("Email đã tồn tại. Vui lòng sử dụng email khác.");
         }
-        
+
         String hashedPassword = this.passwordEncoder.encode(reqRegisterDTO.getPassword());
-        
+
         User newUser = new User();
         newUser.setName(reqRegisterDTO.getName());
         newUser.setEmail(reqRegisterDTO.getEmail());
         newUser.setPassWord(hashedPassword);
+
+        return this.userService.handleSaveUser(newUser);
+    }
+
+    // ✅ THÊM PHƯƠNG THỨC MỚI NÀY
+    /**
+     * Đăng ký một user mới từ OAuth2.
+     * Vì họ không có password, nên ta tạo một password ngẫu nhiên.
+     */
+    public User registerOauthUser(String email, String name) {
+        if (this.userService.isEmailExist(email)) {
+            // Trường hợp này không nên xảy ra vì đã check ở success handler,
+            // nhưng để an toàn, ta trả về user hiện có.
+            return this.userService.handleGetUserByEmail(email);
+        }
+
+        // Tạo một password ngẫu nhiên (user sẽ không dùng nó)
+        // Vì trường password trong DB của bạn là not-blank
+        // String randomPassword = UUID.randomUUID().toString();
+        String randomPassword = "123456";
+        String hashedPassword = this.passwordEncoder.encode(randomPassword);
+
+        User newUser = new User();
+        newUser.setName(name);
+        newUser.setEmail(email);
+        newUser.setPassWord(hashedPassword);
+        // Bạn có thể thêm một trường `provider` (V.d: GOOGLE) cho User nếu muốn
         
         return this.userService.handleSaveUser(newUser);
     }
-    
+
+    // Phương thức login gốc của bạn (không thay đổi)
     public ResLoginDTO login(String username, String password) {
         UsernamePasswordAuthenticationToken authenticationToken = 
             new UsernamePasswordAuthenticationToken(username, password);
@@ -53,9 +82,9 @@ public class AuthService {
 
         User currentUser = this.userService.handleGetUserByEmail(username);
         ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
-            currentUser.getId(),
-            currentUser.getEmail(),
-            currentUser.getName()
+                currentUser.getId(),
+                currentUser.getEmail(),
+                currentUser.getName()
         );
 
         ResLoginDTO res = new ResLoginDTO();
@@ -69,3 +98,4 @@ public class AuthService {
         return res;
     }
 }
+

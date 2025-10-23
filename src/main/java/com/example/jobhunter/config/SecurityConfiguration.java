@@ -9,12 +9,17 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -22,7 +27,16 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.web.util.UriComponentsBuilder;
 
+// ✅ THÊM: Import class tiện ích (sẽ tạo ở file 5)
+import com.example.jobhunter.util.*;
+import com.example.jobhunter.domain.User;
+import com.example.jobhunter.dto.response.ResLoginDTO;
+import com.example.jobhunter.service.AuthService;
+import com.example.jobhunter.service.UserService;
 import com.example.jobhunter.util.error.SecurityUtil;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
@@ -33,6 +47,14 @@ public class SecurityConfiguration {
 
     @Value("${hoan.jwt.base64-secret}")
     private String jwtKey;
+
+    // ✅ Dùng đúng key cho refresh token expiration
+    @Value("${hoan.jwt.refresh-token-validity-in-seconds}")
+    private long refreshTokenExpiration;
+
+    // ✅ Lấy URL của frontend từ application.properties
+    @Value("${hoan.frontend.url}")
+    private String frontendUrl;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,7 +67,12 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain fillterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain fillterChain(HttpSecurity http,
+            // ✅ THÊM: Inject các handler và repository
+            AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
+            AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
+            AuthorizationRequestRepository<OAuth2AuthorizationRequest> cookieAuthorizationRequestRepository)
+            throws Exception {
         http
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
@@ -53,6 +80,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/uploads/**",
                                 "/api/v1/auth/**",
+                                // ... (tất cả các path cũ của bạn)
                                 "/api/v1/career-expectations/**",
                                 "/api/v1/jobs/**",
                                 "/api/v1/chat/**",
@@ -70,11 +98,30 @@ public class SecurityConfiguration {
                                 "/swagger-ui.html",
                                 "/ws/**",
                                 "/error",
-                                "/")
+                                "/",
+                                // ✅ THÊM: Cho phép các endpoint của OAuth2
+                                "/oauth2/**")
                         .permitAll()
                         .anyRequest().authenticated())
+
+                // ✅ THÊM: Cấu hình OAuth2 Login
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authz -> authz
+                                // URL để bắt đầu flow OAuth2
+                                .baseUri("/oauth2/authorize")
+                                // Dùng cookie repository thay vì session (quan trọng)
+                                .authorizationRequestRepository(cookieAuthorizationRequestRepository))
+                        .redirectionEndpoint(r -> r
+                                // URL callback mà Google sẽ gọi về
+                                .baseUri("/api/v1/auth/oauth2/callback/*"))
+                        // Handler khi thành công (tạo JWT)
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        // Handler khi thất bại
+                        .failureHandler(oAuth2AuthenticationFailureHandler))
+
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(f -> f.disable())
+                // ✅ Đảm bảo app là STATELESS
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
@@ -115,4 +162,101 @@ public class SecurityConfiguration {
         return jwtAuthenticationConverter;
 
     }
+
+    // === ✅ CÁC BEAN MỚI CHO OAUTH2 ===
+
+    /**
+     * Repository lưu trữ OAuth2AuthorizationRequest trong cookie
+     * thay vì HttpSession để hỗ trợ stateless.
+     */
+    @Bean
+    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> cookieAuthorizationRequestRepository() {
+        // Class này bạn phải tự tạo (xem file 5)
+        return new HttpCookieOAuth2AuthorizationRequestRepository();
+    }
+
+    /**
+     * Handler xử lý khi login OAuth2 thành công.
+     * Đây là nơi tích hợp: Sẽ tạo/cập nhật user,
+     * sau đó gọi logic tạo JWT và set cookie y hệt như login thường.
+     */
+    @Bean
+    public AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler(
+            UserService userService,
+            AuthService authService,
+            SecurityUtil securityUtil) {
+        return (request, response, authentication) -> {
+            OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+            String email = oidcUser.getEmail();
+            String name = oidcUser.getFullName();
+
+            // 1. Tìm hoặc tạo user
+            User user = userService.handleGetUserByEmail(email);
+            if (user == null) {
+                // Dùng AuthService để tạo user OAuth mới (xem file 4)
+                user = authService.registerOauthUser(email, name);
+            }
+
+            // 2. Tạo DTO và Tokens (Dùng lại logic của bạn)
+            ResLoginDTO res = new ResLoginDTO();
+            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName());
+            res.setUser(userLogin);
+
+            // ✅ GỌI LOGIC TẠO TOKEN HIỆN TẠI CỦA BẠN
+            String accessToken = securityUtil.createAccessToken(email, res.getUser());
+            res.setAccessToken(accessToken);
+
+            // ✅ GỌI LOGIC TẠO REFRESH TOKEN HIỆN TẠI CỦA BẠN
+            String refreshToken = securityUtil.createRefreshToken(email, res);
+            userService.updateUserToken(refreshToken, email);
+
+            // 3. Tạo Refresh Token Cookie (Dùng lại logic của bạn)
+            ResponseCookie refreshCookie = ResponseCookie
+                    .from("refresh_token", refreshToken)
+                    .httpOnly(true)
+                    .secure(true) // Set false nếu dev không có HTTPS
+                    .path("/")
+                    .maxAge(refreshTokenExpiration) // Dùng giá trị từ properties
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+            // 4. Build Redirect URI về frontend
+            String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/login")
+                    .queryParam("oauth", "success")
+                    .queryParam("provider", "google")
+                    .queryParam("email", user.getEmail())
+                    .queryParam("name", user.getName())
+                    .queryParam("access_token", accessToken) // Gửi luôn access_token về
+                    .build().toUriString();
+
+            // Xóa cookie tạm thời dùng cho flow OAuth2
+            HttpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
+
+            response.sendRedirect(redirectUrl);
+        };
+    }
+
+    /**
+     * Handler xử lý khi login OAuth2 thất bại.
+     */
+    @Bean
+    public AuthenticationFailureHandler oAuth2AuthenticationFailureHandler() {
+        return (request, response, exception) -> {
+            String errorMessage = "OAuth2 login failed: " + exception.getLocalizedMessage();
+
+            // Redirect về trang login của frontend với thông báo lỗi
+            String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/login")
+                    .queryParam("error", errorMessage)
+                    .build().toUriString();
+
+            // Xóa cookie tạm thời
+            HttpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
+
+            response.sendRedirect(redirectUrl);
+        };
+    }
 }
+
