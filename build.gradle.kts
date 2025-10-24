@@ -48,16 +48,14 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     
     // ✅ SỬA: Test dependencies - Thêm JUnit Platform
+    // Gradle sẽ có junit-jupiter-api (từ starter-test) khi biên dịch, và có junit-jupiter-engine + junit-platform-launcher
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("org.springframework.security:spring-security-test")
     
-    // ✅ THÊM: JUnit Platform dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 // ✅ SỬA: Test configuration
@@ -69,6 +67,11 @@ tasks.withType<Test> {
         "--add-opens", "java.base/java.lang=ALL-UNNAMED",
         "--add-opens", "java.base/java.util=ALL-UNNAMED"
     )
+    // ✅ THÊM KHỐI NÀY ĐỂ IN KẾT QUẢ RA CONSOLE
+    testLogging {
+        // Yêu cầu Gradle in ra sự kiện 'passed', 'skipped', và 'failed'
+        events("passed", "skipped", "failed")
+    }
 }
 
 // ✅ THÊM: Skip tests nếu muốn build nhanh
