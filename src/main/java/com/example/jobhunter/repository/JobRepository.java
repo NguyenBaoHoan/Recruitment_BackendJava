@@ -48,4 +48,5 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
      */
     @Query("SELECT j FROM Job j WHERE j.isActive = true AND j.endDate >= :currentDate AND j.endDate <= :futureDate")
     List<Job> findJobsExpiringWithinDays(@Param("currentDate") Date currentDate, @Param("futureDate") Date futureDate);
+    List<Job> findByName(String name);
 }

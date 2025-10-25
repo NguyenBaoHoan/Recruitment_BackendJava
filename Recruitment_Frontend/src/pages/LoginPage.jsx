@@ -69,7 +69,7 @@ const LoginPage = () => {
         {/* Logo & Title */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to JobHunter</p>
+          <p className="text-gray-600">Sign in to Recruitment</p>
         </div>
 
         {/* Login Form */}

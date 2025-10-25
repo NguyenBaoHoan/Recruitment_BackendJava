@@ -48,16 +48,16 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     
     // ✅ SỬA: Test dependencies - Thêm JUnit Platform
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     
     // ✅ THÊM: JUnit Platform dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    
+    // ✅ THÊM: Playwright dependencies
+    testImplementation("com.microsoft.playwright:playwright:1.40.0")
+    testImplementation("org.assertj:assertj-core:3.24.2")
 }
 
 // ✅ SỬA: Test configuration
@@ -79,4 +79,44 @@ tasks.named("build") {
 // ✅ THÊM: Task để build mà không chạy test
 tasks.register("buildWithoutTests") {
     dependsOn("assemble")
+}
+
+// ✅ PLAYWRIGHT TASKS
+tasks.register<JavaExec>("playwrightInstall") {
+    group = "playwright"
+    description = "Install Playwright browsers"
+    classpath = configurations.testRuntimeClasspath.get()
+    mainClass.set("com.microsoft.playwright.CLI")
+    args("install")
+}
+
+tasks.register<Test>("playwrightTest") {
+    group = "playwright"
+    description = "Run Playwright E2E tests"
+    useJUnitPlatform()
+    
+    // Chỉ chạy Playwright tests
+    include("**/playwright/tests/*Test.class")
+    include("**/playwright/tests/*Tests.class")
+    
+    systemProperty("playwright.headless", "true")
+    systemProperty("frontend.url", "http://localhost:5173")
+    systemProperty("backend.url", "http://localhost:8080")
+    
+    dependsOn("playwrightInstall")
+}
+
+tasks.register<Test>("playwrightTestHeaded") {
+    group = "playwright"
+    description = "Run Playwright tests with browser visible"
+    useJUnitPlatform()
+    
+    include("**/playwright/tests/*Test.class")
+    include("**/playwright/tests/*Tests.class")
+    
+    systemProperty("playwright.headless", "false")
+    systemProperty("frontend.url", "http://localhost:5173")
+    systemProperty("backend.url", "http://localhost:8080")
+    
+    dependsOn("playwrightInstall")
 }
