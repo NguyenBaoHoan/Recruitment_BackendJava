@@ -28,7 +28,7 @@ public class GlobalException {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError(exception.getMessage());
-        res.setMessage("Exception occurs...");
+        res.setMessage("Email hoặc mật khẩu không đúng");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 

@@ -9,7 +9,7 @@ public class LoginPage {
     private final Page page;
     
     // Selectors
-    private static final String EMAIL_INPUT = "input[name='email']";
+    private static final String EMAIL_INPUT = "input[name='username']";
     private static final String PASSWORD_INPUT = "input[name='password']";
     private static final String LOGIN_BUTTON = "button[type='submit']";
     private static final String REGISTER_LINK = "a[href='/register']";

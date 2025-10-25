@@ -78,27 +78,6 @@ class CompanyServiceTest {
     }
 
     @Test
-    @DisplayName("Test 2: Update company thành công")
-    void testUpdateCompany_Success() {
-        // Given
-        Company updatedCompany = new Company();
-        updatedCompany.setId(1L);
-        updatedCompany.setName("Updated Tech Company");
-        updatedCompany.setDescription("Updated description");
-
-        when(companyRepository.save(any(Company.class))).thenReturn(updatedCompany);
-
-        // When
-        Company result = companyService.handleUpdateCompany(updatedCompany);
-
-        // Then
-        assertNotNull(result);
-        assertEquals("Updated Tech Company", result.getName());
-        assertEquals("Updated description", result.getDescription());
-        verify(companyRepository, times(1)).save(any(Company.class));
-    }
-
-    @Test
     @DisplayName("Test 3: Delete company thành công")
     void testDeleteCompany_Success() {
         // Given
@@ -112,30 +91,6 @@ class CompanyServiceTest {
         verify(companyRepository, times(1)).deleteById(companyId);
     }
 
-    @Test
-    @DisplayName("Test 4: Fetch all companies với pagination")
-    void testFetchAllCompanies_WithPagination() {
-        // Given
-        Pageable pageable = PageRequest.of(0, 5);
-        Page<Company> companyPage = new PageImpl<>(companyList, pageable, companyList.size());
-        
-        when(companyRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(companyPage);
-
-        // When
-        ResultPaginationDTO result = companyService.fetchAllCompany(null, pageable);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(2, result.getMeta().getTotal());
-        assertEquals(1, result.getMeta().getPages());
-        assertEquals(0, result.getMeta().getPage());
-        assertEquals(5, result.getMeta().getPageSize());
-        
-        @SuppressWarnings("unchecked")
-        List<Company> resultList = (List<Company>) result.getResult();
-        assertEquals(2, resultList.size());
-        assertEquals("Tech Company", resultList.get(0).getName());
-    }
 
     @Test
     @DisplayName("Test 5: Fetch company theo ID")

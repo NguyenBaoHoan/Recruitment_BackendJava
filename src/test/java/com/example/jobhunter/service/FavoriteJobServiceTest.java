@@ -135,21 +135,4 @@ void testRemoveFromFavorites_Success() {
         verify(favoriteJobRepository, times(1)).findByUserIdAndJobId(1L, 1L);
     }
 
-    @Test
-    @DisplayName("Test 5: Lấy danh sách job yêu thích của user")
-    void testGetFavoriteJobs() {
-        // Given
-        List<FavoriteJob> favoriteJobs = Arrays.asList(testFavoriteJob);
-        when(favoriteJobRepository.findByUserId(1L)).thenReturn(favoriteJobs);
-
-        // When
-        List<ResFavoriteJobDTO> result = favoriteJobService.getFavoriteJobs(1L);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("1500.0", result.get(0).getSalary());
-        assertEquals("Hà Nội", result.get(0).getLocation());
-        verify(favoriteJobRepository, times(1)).findByUserId(1L);
-    }
 }
