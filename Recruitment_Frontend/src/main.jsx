@@ -12,6 +12,10 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import GoogleLoginTest from './GoogleLoginTest'
+import AllJobPage from './pages/jobs/AllJobsPage'
+import SearchJobPage from './pages/jobs/SearchJobsPage'
+import SavedJobsPage from './pages/jobs/SavedJobsPage'
+import JobDetailPage from './pages/jobs/JobDetailPage'
 
 
 const router = createBrowserRouter([
@@ -40,8 +44,24 @@ const router = createBrowserRouter([
         )
       },
       {
+        path: "jobs",
+        element: <AllJobPage />
+      },
+      {
+        path: "search",
+        element: <SearchJobPage />
+      },
+      {
+        path: "saved-jobs",
+        element: <SavedJobsPage />
+      },
+      {
         path: "",
         element: <Navigate to="/dashboard" replace />
+      },
+      {
+        path: "/jobs/:id",
+        element: <JobDetailPage />
       }
     ]
   }
