@@ -26,7 +26,7 @@ public class SimplePlaywrightTest {
     }
 
     @Test
-    @DisplayName("Simple test - Navigate to frontend and check login page contains 'JobHunter'")
+    @DisplayName("Simple test - Navigate to frontend and check login page contains 'Recruitment'")
     void simpleTest() {
         // Given
         page.navigate("http://localhost:5173/login");
@@ -72,5 +72,32 @@ public class SimplePlaywrightTest {
         page.pause();
 
         System.out.println("✅ Login page elements test passed!");
+    }
+
+    @Test
+    @DisplayName("Test Playwright is working")
+    void testPlaywrightWorking() {
+        // Given
+        page.navigate("https://example.com");
+
+        // Then
+        assertTrue(page.title().contains("Example"));
+        System.out.println("✅ Playwright is working! Page title: " + page.title());
+    }
+
+    @Test
+    @DisplayName("Test Playwright can create page")
+    void testPlaywrightCanCreatePage() {
+        // Given
+        Page newPage = context.newPage();
+
+        // When
+        newPage.navigate("https://httpbin.org/get");
+
+        // Then
+        assertTrue(newPage.content().contains("httpbin"));
+        System.out.println("✅ Playwright can create and navigate pages!");
+
+        newPage.close();
     }
 }
