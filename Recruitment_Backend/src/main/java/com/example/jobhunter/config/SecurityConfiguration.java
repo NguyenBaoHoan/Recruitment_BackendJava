@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -188,9 +189,40 @@ public class SecurityConfiguration {
             AuthService authService,
             SecurityUtil securityUtil) {
         return (request, response, authentication) -> {
-            OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-            String email = oidcUser.getEmail();
-            String name = oidcUser.getFullName();
+            // ✅ SỬA LỖI: Dùng OAuth2User thay vì OidcUser để hỗ trợ cả OIDC (Google) và
+            // OAuth2 (GitHub)
+            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+
+            // ✅ Lấy email từ attributes (tên thuộc tính có thể khác nhau giữa providers)
+            String email = oauth2User.getAttribute("email");
+
+            // ✅ Lấy name, xử lý các providers khác nhau
+            String name = oauth2User.getAttribute("name"); // Google, Facebook có "name"
+
+            // ✅ XỬ LÝ: GitHub không có "name", dùng "login" (username) thay thế
+            if (name == null || name.isEmpty()) {
+                name = oauth2User.getAttribute("login"); // GitHub dùng "login"
+                if (name == null || name.isEmpty()) {
+                    // Fallback cuối cùng: lấy từ email
+                    if (email != null && !email.isEmpty()) {
+                        name = email.split("@")[0];
+                    } else {
+                        name = "User"; // Fallback mặc định
+                    }
+                }
+            }
+
+            // ✅ XỬ LÝ: Kiểm tra email có tồn tại không (GitHub user có thể ẩn email)
+            if (email == null || email.isEmpty()) {
+                String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/login")
+                        .queryParam("error",
+                                "Email not available. Please make your email public in your provider settings.")
+                        .encode(StandardCharsets.UTF_8)
+                        .build().toUriString();
+                HttpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
+                response.sendRedirect(redirectUrl);
+                return;
+            }
 
             // 1. Tìm hoặc tạo user
             User user = userService.handleGetUserByEmail(email);
